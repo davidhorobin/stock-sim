@@ -1,8 +1,4 @@
-import yfinance as yf
-
-def main():
-    dat = yf.Ticker("MSFT")
-    print(dat.fast_info["last_price"])
+import views
 
 if __name__ == '__main__':
-    main()
+    views.run()
