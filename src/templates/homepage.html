@@ -7,8 +7,8 @@
 <body>
 <h1>Stock Simulator Homepage</h1>
 <h3>Top Stocks today:</h3>
-<p>Apple - $100</p>
-<p>Google - $95</p>
-<p>Microsoft - $90</p>
+{% for stock in top_cap %}
+<p>{{ "%s : $%s" % (stock[0], stock[1]) }}</p>
+{% endfor %}
 </body>
 </html>
