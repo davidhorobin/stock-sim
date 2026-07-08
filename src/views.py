@@ -7,8 +7,8 @@ app = Flask(__name__)
 
 @app.route("/")
 def homepage():
-    top_stocks = queries.get_top_stocks(5)
-    return render_template("homepage.html", top_cap=top_stocks)
+    top = queries.get_top_stocks(5)
+    return render_template("homepage.html", top_stocks=top)
 
 
 @app.route("/portfolio")
@@ -17,4 +17,4 @@ def portfolio():
 
 
 def run():
-    app.run()
+    app.run(debug=True)
