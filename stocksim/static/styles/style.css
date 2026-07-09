@@ -194,6 +194,10 @@ tbody tr:last-child {
     border-bottom: none;
 }
 
+tbody tr[onclick] {
+    cursor: pointer;
+}
+
 tbody tr:hover {
     background: var(--panel-alt);
 }

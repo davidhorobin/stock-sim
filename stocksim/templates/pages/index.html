@@ -23,7 +23,7 @@
 				</thead>
 				<tbody>
 				{% for stock in top_stocks["top_cap"] %}
-				<tr>
+				<tr onclick="window.location='{{ url_for('pages.stockinfo', symbol=stock[0]) }}'">
 					<td class="rank">{{ loop.index }}</td>
 					<td class="ticker-cell">{{ stock[0] }}</td>
 					<td class="mono">{{ stock[1]|round(2) }}</td>
@@ -49,7 +49,7 @@
 				</thead>
 				<tbody>
 				{% for stock in top_stocks["top_win"] %}
-				<tr>
+				<tr onclick="window.location='{{ url_for('pages.stockinfo', symbol=stock[0]) }}'">
 					<td class="rank">{{ loop.index }}</td>
 					<td class="ticker-cell">{{ stock[0] }}</td>
 					<td class="mono">{{ stock[1]|round(2) }}</td>
@@ -75,7 +75,7 @@
 				</thead>
 				<tbody>
 				{% for stock in top_stocks["top_loss"] %}
-				<tr>
+				<tr onclick="window.location='{{ url_for('pages.stockinfo', symbol=stock[0]) }}'">
 					<td class="rank">{{ loop.index }}</td>
 					<td class="ticker-cell">{{ stock[0] }}</td>
 					<td class="mono">{{ stock[1]|round(2) }}</td>

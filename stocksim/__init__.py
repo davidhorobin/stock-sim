@@ -25,4 +25,7 @@ def create_app(test_config=None):
     from . import pages
     app.register_blueprint(pages.bp)
 
+    from . import trading
+    app.register_blueprint(trading.bp)
+
     return app
