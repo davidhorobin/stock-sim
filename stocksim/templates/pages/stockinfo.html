@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block header %}
+<h1>{% block title %}Stock info for {{ info["longName"] }} {% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<form method="post">
+	<label for="symbol">Symbol</label>
+	<input name="symbol" id="symbol" required>
+	<input type="submit" value="Lookup">
+</form>
+{% if info %}
+<table>
+	<thead>
+	<tr>
+		<th>Key</th>
+		<th>Value</th>
+	</tr>
+	</thead>
+	<tbody>
+	<tr>
+		<td>Name</td>
+		<td>{{ info["longName"] }}</td>
+	</tr>
+	<tr>
+		<td>Symbol</td>
+		<td>{{ info["symbol"] }}</td>
+	</tr>
+	<tr>
+		<td>Price</td>
+		<td>{{ "$%s" % (info["regularMarketPrice"]) }}</td>
+	</tr>
+	<tr>
+		<td>Daily change</td>
+		<td>{{ "%s%%" % (info["regularMarketChangePercent"]|round(2)) }}</td>
+	</tr>
+	<tr>
+		<td>Location</td>
+		{% if info["country"] == "United States" %}
+		<td>{{ "%s %s, United States" % (info["city"], info["state"]) }}</td>
+		{% else %}
+		<td>{{ "%s, %s" % (info["city"], info["country"]) }}</td>
+		{% endif %}
+	</tr>
+	<tr>
+		<td>
+			Industry
+		</td>
+		<td>{{ info["industryDisp"] }}</td>
+	</tr>
+	<tr>
+		<td>Market cap</td>
+		<td>{{ "$%s" % (info["marketCap"]) }}</td>
+	</tr>
+	<tr>
+		<td>12-month high</td>
+		<td>{{ "$%s" % (info["fiftyTwoWeekHigh"]) }}</td>
+	</tr>
+	<tr>
+		<td>12-month low</td>
+		<td>{{ "$%s" % (info["fiftyTwoWeekLow"]) }}</td>
+	</tr>
+	<tr>
+		<td>{{ info["companyOfficers"][0]["title"] }}</td>
+		<td>{{ info["companyOfficers"][0]["name"] }}</td>
+	</tr>
+	<tr>
+		<td>Description</td>
+		<td>{{ info["longBusinessSummary"] }}</td>
+	</tr>
+	</tbody>
+</table>
+{% endif %}
+{% endblock %}

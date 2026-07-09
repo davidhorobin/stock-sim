@@ -4,6 +4,8 @@
 <nav>
 	<h1>Stock Sim</h1>
 	<ul>
+		<li><a href="{{ url_for('pages.index') }}">Home</a></li>
+		<li><a href="{{ url_for('pages.stockinfo') }}">Stock Lookup</a></li>
 		{% if g.user %}
 		<li><span>{{ g.user['username'] }}</span></li>
 		<li><a href="{{ url_for('auth.logout') }}">Log Out</a></li>
