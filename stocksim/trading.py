@@ -13,16 +13,49 @@ bp = Blueprint('trading', __name__)
 @login_required
 def portfolio():
     db = get_db()
-    cash = db.execute('SELECT * FROM users WHERE id=?', (g.user[0],)).fetchone()['cash']
-    assets = db.execute('SELECT * FROM holding WHERE id=?', (g.user[0],)).fetchall()
+    cash = db.execute('SELECT * FROM users WHERE id=?', (g.user["id"],)).fetchone()['cash']
+    assets = db.execute('SELECT * FROM holding WHERE user_id=?', (g.user["id"],)).fetchall()
     asset_rows = []
+    asset_total = 0
     for asset in assets:
         tmp = {"symbol": asset["symbol"], "shares": asset["shares"]}
         price = yf.Ticker(tmp["symbol"]).info["regularMarketPrice"]
         tmp["price"] = price
         tmp["total"] = price * tmp["shares"]
+        tmp["profitloss"] = calculate_profit(db, tmp["symbol"], g.user["id"])
         asset_rows.append(tmp)
-    return render_template('trading/portfolio.html', balance=cash, assets=asset_rows)
+        asset_total += tmp["total"]
+    return render_template('trading/portfolio.html', assettotal=asset_total, balance=cash,
+                           assets=sorted(asset_rows, key=lambda x: x['total'], reverse=True))
+
+
+def calculate_profit(db, symbol, user_id):
+    total_shares = 0
+    total_cost = 0
+    realised_profit_loss = 0
+    unrealised_profit_loss = 0
+
+    transactions = db.execute('SELECT * FROM ledger WHERE symbol=? AND user_id=? ORDER BY created',
+                              (symbol, user_id)).fetchall()
+    for t in transactions:
+        if t['type'] == "buy":
+            total_shares += t['shares']
+            total_cost += t['price'] * t['shares']
+        else:
+            avg_cost = total_cost / total_shares
+            sell_price = t['shares'] * t['price']
+            cost_basis = avg_cost * t['shares']
+            total_shares -= t['shares']
+            realised_profit_loss += sell_price - cost_basis
+            total_cost -= cost_basis
+
+    if total_shares > 0:
+        avg_cost = total_cost / total_shares
+        unrealised_profit_loss = (yf.Ticker(symbol).info["regularMarketPrice"] - avg_cost) * total_shares
+    else:
+        unrealised_profit_loss = 0
+
+    return realised_profit_loss + unrealised_profit_loss
 
 
 @bp.route('/buy', methods=['GET', 'POST'])

@@ -5,7 +5,8 @@
 {% endblock %}
 
 {% block content %}
-<h3>Balance: {{ "$%.2f"|format(balance) }}</h3>
+<h3>Total: {{ "$%.2f"|format(balance+assettotal) }}</h3>
+<h3>Cash: {{ "$%.2f"|format(balance) }}</h3>
 {% if assets|length > 0 %}
 <article class="market-panel">
 	<header class="panel-head">
@@ -29,6 +30,8 @@
 			<td class="mono">{{ asset["shares"]|round(5) }}</td>
 			<td class="mono">{{ "$%.2f"|format(asset["price"]) }}</td>
 			<td class="mono">{{ "$%.2f"|format(asset["total"]) }}</td>
+			<td></td>
+			<td class="mono">{{ "$%.2f"|format(asset["profitloss"]) }}</td>
 		</tr>
 		{% endfor %}
 		</tbody>
