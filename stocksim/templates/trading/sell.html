@@ -24,26 +24,33 @@
 			<td class="mono">{{ "$%.2f"|format(asset["value"]) }}</td>
 			<td class="mono">{{ "$%.2f"|format(asset["purchase_price"]) }}</td>
 			<td>
-				<form id="sell" method="post"><input name="sellamount" id="sellamount" required oninput="updateShares({{ asset["value"] }})"></form>
+				<form id="sell-{{ loop.index }}" method="post">
+					<input name="sellamount" id="sellamount" required oninput=
+							"this.value=this.value.replace(/(?![0-9])./gmi,'');
+                            updateRow(this, {{ asset["value"] }}, {{ asset["market_price"] - asset["avg_price"] }});">
+				</form>
 			</td>
-			<td id="profit">0</td>
+			<td id="profit" >0</td>
 			<td id="remaining">0</td>
-			<td><input form="buy" type="submit" value="Sell"></td>
+			<td><input form="sell-{{ loop.index }}" type="submit" value="Sell"></td>
 		</tr>
 		{% endfor %}
 		</tbody>
 	</table>
 </article>
 <script>
-    function updateShares(total) {
-        const sellamount = parseFloat(document.getElementById('sellamount').value) || 0
-        if (sellamount == 0) {
-            document.getElementById('profit').textContent = 0
-			document.getElementById('remaining').textContent = 0
+    function updateRow(input, total, profitPerShare) {
+        const row = input.closest('tr');
+		const profitCell = row.querySelector('#profit');
+        const remainingCell = row.querySelector('#remaining');
+        const sellAmount = parseFloat(input.value) || 0;
+
+        if (sellAmount == 0) {
+            profitCell.textContent = 0;
+            remainingCell.textContent = 0;
         } else {
-            document.getElementById('profit').textContent = 1
-            document.getElementById('remaining').textContent = Math.round((total - sellamount)* 10000)
-				/ 10000
+			profitCell.textContent = Math.round((profitPerShare * sellAmount) * 10000) / 10000
+			remainingCell.textContent = Math.round((total - sellAmount) * 10000) / 10000
         }
     }
 </script>

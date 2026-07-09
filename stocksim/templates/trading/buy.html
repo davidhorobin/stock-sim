@@ -37,12 +37,12 @@
 </article>
 <script>
     function updateShares() {
-        const value = parseFloat(document.getElementById('value').value) || 0
+        const value = parseFloat(document.getElementById('value').value) || 0;
         if (value == 0) {
-            document.getElementById('shares').textContent = 0
+            document.getElementById('shares').textContent = 0;
         } else {
             document.getElementById('shares').textContent = Math.round((value / {{ info["regularMarketPrice"] }})* 10000)
-				/ 10000
+				/ 10000;
         }
     }
 </script>
