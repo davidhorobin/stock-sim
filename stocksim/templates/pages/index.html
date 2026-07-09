@@ -5,6 +5,95 @@
 {% endblock %}
 
 {% block content %}
-<h3>Top stocks today:</h3>
-<p>Microsoft: $100</p>
+<section class="tables-section" id="markets">
+	<div class="tables-grid">
+
+		<article class="market-panel">
+			<header class="panel-head">
+				<h3>Top Market Capitalisation</h3>
+			</header>
+			<table>
+				<thead>
+				<tr>
+					<th>Rank</th>
+					<th>Ticker</th>
+					<th>Price</th>
+					<th>Mkt Cap</th>
+				</tr>
+				</thead>
+				<tbody>
+				{% for stock in top_stocks["top_cap"] %}
+				<tr>
+					<td class="rank">{{ loop.index }}</td>
+					<td class="ticker-cell">{{ stock[0] }}</td>
+					<td class="mono">{{ stock[1]|round(2) }}</td>
+					<td class="mono">{{ "$%sT" % (stock[2]|round(-10) / 1000000000000) }}</td>
+				</tr>
+				{% endfor %}
+				</tbody>
+			</table>
+		</article>
+
+		<article class="market-panel">
+			<header class="panel-head">
+				<h3>Top Gainers Today</h3>
+			</header>
+			<table>
+				<thead>
+				<tr>
+					<th>Rank</th>
+					<th>Ticker</th>
+					<th>Price</th>
+					<th>Change</th>
+				</tr>
+				</thead>
+				<tbody>
+				{% for stock in top_stocks["top_win"] %}
+				<tr>
+					<td class="rank">{{ loop.index }}</td>
+					<td class="ticker-cell">{{ stock[0] }}</td>
+					<td class="mono">{{ stock[1]|round(2) }}</td>
+					<td class="mono change up">{{ "%s%%" % (stock[2]|round(2)) }}</td>
+				</tr>
+				{% endfor %}
+				</tbody>
+			</table>
+		</article>
+
+		<article class="market-panel">
+			<header class="panel-head">
+				<h3>Top Losers Today</h3>
+			</header>
+			<table>
+				<thead>
+				<tr>
+					<th>Rank</th>
+					<th>Ticker</th>
+					<th>Price</th>
+					<th>Change</th>
+				</tr>
+				</thead>
+				<tbody>
+				{% for stock in top_stocks["top_loss"] %}
+				<tr>
+					<td class="rank">{{ loop.index }}</td>
+					<td class="ticker-cell">{{ stock[0] }}</td>
+					<td class="mono">{{ stock[1]|round(2) }}</td>
+					<td class="mono change down">{{ "%s%%" % (stock[2]|round(2)) }}</td>
+				</tr>
+				{% endfor %}
+				</tbody>
+			</table>
+		</article>
+
+	</div>
+</section>
+<section class="lower-grid">
+	<article class="panel-block news-block" id="news">
+		<header class="panel-head"><h3>Market News</h3><span class="panel-sub">Latest headlines</span></header>
+		<ul class="news-list">
+			<li><span class="news-time">08:12</span>Fed minutes point to steady rates through Q3</li>
+		</ul>
+	</article>
+</section>
 {% endblock %}
