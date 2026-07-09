@@ -79,7 +79,7 @@
 					<td class="rank">{{ loop.index }}</td>
 					<td class="ticker-cell">{{ stock[0] }}</td>
 					<td class="mono">{{ stock[1]|round(2) }}</td>
-					<td class="mono change down">{{ "%s%%" % (stock[2]|round(2)) }}</td>
+					<td class="mono change down">{{ "%s%%" % (stock[2]|round(2)|abs) }}</td>
 				</tr>
 				{% endfor %}
 				</tbody>
