@@ -5,5 +5,34 @@
 {% endblock %}
 
 {% block content %}
-<p>Microsoft : $100</p>
+<h3>Balance: {{ "$%.2f"|format(balance) }}</h3>
+{% if assets|length > 0 %}
+<article class="market-panel">
+	<header class="panel-head">
+		<h3>Assets</h3>
+	</header>
+	<table>
+		<thead>
+		<tr>
+			<td>Symbol</td>
+			<td>Quantity</td>
+			<td>Price</td>
+			<td>Total</td>
+		</tr>
+		</thead>
+		<tbody>
+		{% for asset in assets %}
+		<tr>
+			<td class="ticker-cell">{{ asset["symbol"] }}</td>
+			<td class="mono">{{ asset["shares"]|round(5) }}</td>
+			<td class="mono">{{ "$%.2f"|format(asset["price"]) }}</td>
+			<td class="mono">{{ "$%.2f"|format(asset["total"]) }}</td>
+		</tr>
+		{% endfor %}
+		</tbody>
+	</table>
+</article>
+{% else %}
+<p>No assets</p>
+{% endif %}
 {% endblock %}
