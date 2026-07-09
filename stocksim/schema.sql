@@ -1,0 +1,30 @@
+DROP TABLE IF EXISTS user;
+DROP TABLE IF EXISTS ledger;
+DROP TABLE IF EXISTS holding;
+
+CREATE TABLE user (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    cash REAL NOT NULL DEFAULT 1000.00
+);
+
+CREATE TABLE ledger (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    symbol TEXT NOT NULL,
+    shares REAL NOT NULL,
+    price REAL NOT NULL,
+    type TEXT NOT NULL CHECK (type IN ('buy', 'sell')),
+    created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES user (id)
+);
+
+CREATE TABLE holding (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    symbol TEXT NOT NULL,
+    shares REAL NOT NULL,
+    UNIQUE (user_id, symbol),
+    FOREIGN KEY (user_id) REFERENCES user (id)
+);

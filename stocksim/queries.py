@@ -48,3 +48,8 @@ def get_top_stocks(n):
 
 def get_ticker(s):
     print(yf.Ticker(s).info)
+
+
+def get_market_summary(s):
+    print(yf.Market(s).status)
+    print(yf.Market(s).summary)
