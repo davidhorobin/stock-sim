@@ -6,6 +6,14 @@
 
 {% block content %}
 <h3>Total: {{ "$%.2f"|format(balance+assettotal) }}</h3>
+<h3 style="display: inline;">Profit:</h3>
+{% if profit|round(2) > 0 %}
+<h3 style="display: inline;" class="mono change up">{{ "$%.2f"|format(profit) }}</h3>
+{% elif profit|round(2) < 0 %}
+<h3 style="display: inline;" class="mono change down">{{ "$%.2f"|format(profit) }}</h3>
+{% else %}
+<h3 style="display: inline;" class="mono">{{ "$%.2f"|format(profit) }}</h3>
+{% endif %}
 <h3>Cash: {{ "$%.2f"|format(balance) }}</h3>
 {% if assets|length > 0 %}
 <article class="market-panel">
@@ -30,8 +38,14 @@
 			<td class="mono">{{ asset["shares"]|round(5) }}</td>
 			<td class="mono">{{ "$%.2f"|format(asset["price"]) }}</td>
 			<td class="mono">{{ "$%.2f"|format(asset["total"]) }}</td>
-			<td></td>
+			<td class="mono">{{ "$%.2f"|format(asset["avgcost"]) }}</td>
+			{% if asset["profitloss"]|round(2) > 0 %}
+			<td class="mono change up">{{ "$%.2f"|format(asset["profitloss"]) }}</td>
+			{% elif asset["profitloss"]|round(2) < 0 %}
+			<td class="mono change down">{{ "$%.2f"|format(asset["profitloss"]) }}</td>
+			{% else %}
 			<td class="mono">{{ "$%.2f"|format(asset["profitloss"]) }}</td>
+			{% endif %}
 		</tr>
 		{% endfor %}
 		</tbody>

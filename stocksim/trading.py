@@ -17,21 +17,25 @@ def portfolio():
     assets = db.execute('SELECT * FROM holding WHERE user_id=?', (g.user["id"],)).fetchall()
     asset_rows = []
     asset_total = 0
+    profit_total = 0
     for asset in assets:
         tmp = {"symbol": asset["symbol"], "shares": asset["shares"]}
         price = yf.Ticker(tmp["symbol"]).info["regularMarketPrice"]
         tmp["price"] = price
         tmp["total"] = price * tmp["shares"]
-        tmp["profitloss"] = calculate_profit(db, tmp["symbol"], g.user["id"])
+        profit_calculations = calculate_profit(db, tmp["symbol"], g.user["id"])
+        tmp["profitloss"] = profit_calculations[0]
+        tmp["avgcost"] = profit_calculations[1]
+        profit_total += tmp["profitloss"]
         asset_rows.append(tmp)
         asset_total += tmp["total"]
-    return render_template('trading/portfolio.html', assettotal=asset_total, balance=cash,
+    return render_template('trading/portfolio.html', profit=profit_total, assettotal=asset_total, balance=cash,
                            assets=sorted(asset_rows, key=lambda x: x['total'], reverse=True))
 
 
 def calculate_profit(db, symbol, user_id):
-    total_shares = 0
-    total_cost = 0
+    running_shares = 0
+    running_cost = 0
     realised_profit_loss = 0
     unrealised_profit_loss = 0
 
@@ -39,23 +43,23 @@ def calculate_profit(db, symbol, user_id):
                               (symbol, user_id)).fetchall()
     for t in transactions:
         if t['type'] == "buy":
-            total_shares += t['shares']
-            total_cost += t['price'] * t['shares']
+            running_shares += t['shares']
+            running_cost += t['price'] * t['shares']
         else:
-            avg_cost = total_cost / total_shares
+            avg_cost = running_cost / running_shares
             sell_price = t['shares'] * t['price']
             cost_basis = avg_cost * t['shares']
-            total_shares -= t['shares']
+            running_shares -= t['shares']
             realised_profit_loss += sell_price - cost_basis
-            total_cost -= cost_basis
+            running_cost -= cost_basis
 
-    if total_shares > 0:
-        avg_cost = total_cost / total_shares
-        unrealised_profit_loss = (yf.Ticker(symbol).info["regularMarketPrice"] - avg_cost) * total_shares
+    if running_shares > 0:
+        avg_cost = running_cost / running_shares
+        unrealised_profit_loss = (yf.Ticker(symbol).info["regularMarketPrice"] - avg_cost) * running_shares
     else:
         unrealised_profit_loss = 0
 
-    return realised_profit_loss + unrealised_profit_loss
+    return (realised_profit_loss + unrealised_profit_loss, running_cost)
 
 
 @bp.route('/buy', methods=['GET', 'POST'])
@@ -93,7 +97,7 @@ def buy(symbol=None):
                                (g.user['id'], symbol, shares))
                     db.commit()
                 except db.IntegrityError:
-                    db.execute('UPDATE holding SET shares=shares+? WHERE id=?', (shares, g.user['id']))
+                    db.execute('UPDATE holding SET shares=shares+? WHERE user_id=?', (shares, g.user['id']))
                     db.commit()
                 return redirect(url_for('trading.portfolio'))
 

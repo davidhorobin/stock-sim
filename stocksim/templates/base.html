@@ -1,6 +1,7 @@
 <!doctype html>
 <title>{% block title %}{% endblock %}</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}">
+<link rel="shortcut icon" href="{{ url_for('static', filename='candlestick-chart.png') }}">
 <nav>
 	<h1><a href="{{ url_for('pages.index') }}">Stock Sim</a></h1>
 	<ul>
@@ -28,7 +29,10 @@
 	<div class="footer-inner">
 		<span>Stock Market Simulator by David Horobin.</span>
 		<div class="footer-links">
+			<a class="credit" href="https://www.flaticon.com/free-icons/forex" title="forex icons">Icon made by Vlad
+				Szirka (flaticon.com)</a>
 			<a href="https://github.com/davidhorobin/stock-sim">GitHub</a>
+			<a href="https://www.linkedin.com/in/david-horobin-ab5920356">LinkedIn</a>
 		</div>
 	</div>
 </footer>

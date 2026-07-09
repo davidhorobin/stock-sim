@@ -238,6 +238,19 @@ td.ticker-cell {
     color: var(--accent);
 }
 
+h3.mono {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+}
+
+h3.change.up {
+    color: var(--up);
+}
+
+h3.change.down {
+    color: var(--down);
+}
+
 td.mono {
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
@@ -367,6 +380,12 @@ form input[type="submit"]:hover {
     color: var(--muted);
 }
 
+.footer-links {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
 .footer-links a {
     color: var(--muted);
     text-decoration: none;
@@ -374,6 +393,11 @@ form input[type="submit"]:hover {
 
 .footer-links a:hover {
     color: var(--accent);
+}
+
+.footer-links a:not(:last-child) {
+    border-right: 1px solid var(--border);
+    padding-right: 1.25rem;
 }
 
 /* Responsive */
