@@ -29,19 +29,45 @@ def portfolio():
 @bp.route('/buy/<symbol>', methods=['GET', 'POST'])
 @login_required
 def buy(symbol=None):
+    db = get_db()
+    cash = db.execute('SELECT * FROM users WHERE id=?', (g.user['id'],)).fetchone()['cash']
     if request.method == 'POST':
-        symbol = request.form['symbol']
         error = None
+        if "symbol" in request.form.keys():
+            symbol = request.form['symbol']
 
-        if symbol == '':
-            error = "Please enter a stock symbol"
+            if symbol == '':
+                error = "Please enter a stock symbol"
 
-        if error is None:
-            return redirect(url_for('trading.buy', symbol=symbol))
+            if error is None:
+                return redirect(url_for('trading.buy', symbol=symbol))
+
+
+        else:
+            value = request.form['value']
+            price = yf.Ticker(symbol).info["regularMarketPrice"]
+            shares = float(value) / price
+            if float(value) > cash:
+                error = "Value of the stock exceeds account balance. Please try again."
+
+            if error is None:
+                db.execute('INSERT INTO ledger (user_id, symbol, shares, price, type) VALUES (?,?,?,?,?)',
+                           (g.user['id'], symbol, shares, price, 'buy'))
+                db.execute('UPDATE users SET cash=? WHERE id=?', (cash - float(value), g.user['id']))
+                db.commit()
+                try:
+                    db.execute('INSERT INTO holding (user_id, symbol, shares) VALUES (?,?,?)',
+                               (g.user['id'], symbol, shares))
+                    db.commit()
+                except db.IntegrityError:
+                    db.execute('UPDATE holding SET shares=shares+? WHERE id=?', (shares, g.user['id']))
+                    db.commit()
+                return redirect(url_for('trading.portfolio'))
 
         flash(error)
     if symbol is None:
         info = None
     else:
         info = yf.Ticker(symbol).info
-    return render_template('trading/buy.html', info=info)
+
+    return render_template('trading/buy.html', balance=cash, info=info)

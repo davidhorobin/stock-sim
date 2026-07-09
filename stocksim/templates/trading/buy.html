@@ -10,8 +10,41 @@
 	<input name="symbol" id="symbol" required>
 	<input type="submit" value="Lookup">
 </form>
-<h3>Your balance: </h3>
+<h3>Your balance: {{ "$%.2f"|format(balance) }}</h3>
 {% if info %}
-<p>{{ info["symbol"] ~ " " ~ info["regularMarketPrice"] }}</p>
+<article class="market-panel">
+	<table>
+		<thead>
+		<tr>
+			<td>Symbol</td>
+			<td>Price</td>
+			<td>Value</td>
+			<td>Shares</td>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<td class="ticker-cell">{{ info["symbol"] }}</td>
+			<td class="mono">{{ "$%.2f"|format(info["regularMarketPrice"]) }}</td>
+			<td>
+				<form id="buy" method="post"><input name="value" id="value" required oninput="updateShares()"></form>
+			</td>
+			<td id="shares">0</td>
+			<td><input form="buy" type="submit" value="Buy"></td>
+		</tr>
+		</tbody>
+	</table>
+</article>
+<script>
+    function updateShares() {
+        const value = parseFloat(document.getElementById('value').value) || 0
+        if (value == 0) {
+            document.getElementById('shares').textContent = 0
+        } else {
+            document.getElementById('shares').textContent = Math.round((value / {{ info["regularMarketPrice"] }})* 10000)
+				/ 10000
+        }
+    }
+</script>
 {% endif %}
 {% endblock %}
