@@ -17,7 +17,9 @@
 			<td>Symbol</td>
 			<td>Quantity</td>
 			<td>Price</td>
-			<td>Total</td>
+			<td>Value</td>
+			<td>Purchase price</td>
+			<td>Profit</td>
 		</tr>
 		</thead>
 		<tbody>
@@ -35,4 +37,5 @@
 {% else %}
 <p>No assets</p>
 {% endif %}
+<a href="{{ url_for('trading.buy') }}" class="btn-buy">Buy</a>
 {% endblock %}

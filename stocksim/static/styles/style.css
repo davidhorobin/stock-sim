@@ -120,6 +120,29 @@ header h1 {
     font-size: 0.9rem;
 }
 
+.btn-buy {
+    display: inline-block;
+    background: var(--up);
+    color: #06281B;
+    border: none;
+    padding: 0.55rem 1.25rem;
+    border-radius: 4px;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: filter 0.15s ease;
+}
+
+.btn-buy:hover {
+    filter: brightness(1.1);
+}
+
+.btn-buy:active {
+    filter: brightness(0.95);
+}
+
 /* Market panel grid */
 
 .tables-grid {

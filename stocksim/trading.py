@@ -23,3 +23,25 @@ def portfolio():
         tmp["total"] = price * tmp["shares"]
         asset_rows.append(tmp)
     return render_template('trading/portfolio.html', balance=cash, assets=asset_rows)
+
+
+@bp.route('/buy', methods=['GET', 'POST'])
+@bp.route('/buy/<symbol>', methods=['GET', 'POST'])
+@login_required
+def buy(symbol=None):
+    if request.method == 'POST':
+        symbol = request.form['symbol']
+        error = None
+
+        if symbol == '':
+            error = "Please enter a stock symbol"
+
+        if error is None:
+            return redirect(url_for('trading.buy', symbol=symbol))
+
+        flash(error)
+    if symbol is None:
+        info = None
+    else:
+        info = yf.Ticker(symbol).info
+    return render_template('trading/buy.html', info=info)

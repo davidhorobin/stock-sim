@@ -25,6 +25,7 @@ def stockinfo(symbol=None):
             return redirect(url_for("pages.stockinfo", symbol=symbol))
 
         flash(error)
+
     if symbol is None:
         info = None
     else:
@@ -32,4 +33,4 @@ def stockinfo(symbol=None):
         if len(info.keys()) <= 1 or info["quoteType"] != "EQUITY":
             flash("Invalid stock symbol")
             info = None
-    return render_template('pages/stockinfo.html', info=info)
+    return render_template('pages/stockinfo.html', symbol=symbol, info=info)

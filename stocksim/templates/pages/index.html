@@ -26,7 +26,7 @@
 				<tr onclick="window.location='{{ url_for('pages.stockinfo', symbol=stock[0]) }}'">
 					<td class="rank">{{ loop.index }}</td>
 					<td class="ticker-cell">{{ stock[0] }}</td>
-					<td class="mono">{{ stock[1]|round(2) }}</td>
+					<td class="mono">{{ "$%.2f"|format(stock[1]|round(2)) }}</td>
 					<td class="mono">{{ "$%sT" % (stock[2]|round(-10) / 1000000000000) }}</td>
 				</tr>
 				{% endfor %}
