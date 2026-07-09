@@ -1,15 +1,50 @@
 {% extends 'base.html' %}
 
 {% block header %}
-<h1>{% block title %}Log In{% endblock %}</h1>
+<h1>{% block title %}Sell{% endblock %}</h1>
 {% endblock %}
 
 {% block content %}
-<form method="post">
-	<label for="username">Username</label>
-	<input name="username" id="username" required>
-	<label for="password">Password</label>
-	<input type="password" name="password" id="password" required>
-	<input type="submit" value="Log In">
-</form>
+<article class="market-panel">
+	<table>
+		<thead>
+		<tr>
+			<td>Symbol</td>
+			<td>Value</td>
+			<td>Purchase Price</td>
+			<td>Sell Amount</td>
+			<td>Profit</td>
+			<td>Remaining</td>
+		</tr>
+		</thead>
+		<tbody>
+		{% for asset in assets %}
+		<tr>
+			<td class="ticker-cell">{{ asset["symbol"] }}</td>
+			<td class="mono">{{ "$%.2f"|format(asset["value"]) }}</td>
+			<td class="mono">{{ "$%.2f"|format(asset["purchase_price"]) }}</td>
+			<td>
+				<form id="sell" method="post"><input name="sellamount" id="sellamount" required oninput="updateShares({{ asset["value"] }})"></form>
+			</td>
+			<td id="profit">0</td>
+			<td id="remaining">0</td>
+			<td><input form="buy" type="submit" value="Sell"></td>
+		</tr>
+		{% endfor %}
+		</tbody>
+	</table>
+</article>
+<script>
+    function updateShares(total) {
+        const sellamount = parseFloat(document.getElementById('sellamount').value) || 0
+        if (sellamount == 0) {
+            document.getElementById('profit').textContent = 0
+			document.getElementById('remaining').textContent = 0
+        } else {
+            document.getElementById('profit').textContent = 1
+            document.getElementById('remaining').textContent = Math.round((total - sellamount)* 10000)
+				/ 10000
+        }
+    }
+</script>
 {% endblock %}

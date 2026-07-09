@@ -108,3 +108,20 @@ def buy(symbol=None):
         info = yf.Ticker(symbol).info
 
     return render_template('trading/buy.html', balance=cash, info=info)
+
+
+@bp.route('/sell', methods=['GET', 'POST'])
+@bp.route('/sell/<symbol>', methods=['GET', 'POST'])
+@login_required
+def sell(symbol=None):
+    db = get_db()
+    cash = db.execute('SELECT * FROM users WHERE id=?', (g.user['id'],)).fetchone()['cash']
+    assets = db.execute('SELECT * FROM holding WHERE user_id=?', (g.user["id"],)).fetchall()
+    asset_rows = []
+    for asset in assets:
+        tmp = {"symbol": asset['symbol']}
+        tmp['value'] = asset['shares'] * yf.Ticker(asset['symbol']).info["regularMarketPrice"]
+        tmp['purchase_price'] = (calculate_profit(db, tmp["symbol"], g.user["id"]))[1]
+        asset_rows.append(tmp)
+
+    return render_template('trading/sell.html', assets=asset_rows)
