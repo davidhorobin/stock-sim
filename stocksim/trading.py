@@ -17,16 +17,20 @@ def portfolio():
     assets = db.execute('SELECT * FROM holding WHERE user_id=?', (g.user["id"],)).fetchall()
     asset_rows = []
     asset_total = 0
-    profit_total = 0
+    profit_total = cash - 10000
     for asset in assets:
         tmp = {"symbol": asset["symbol"], "shares": asset["shares"]}
         price = yf.Ticker(tmp["symbol"]).info["regularMarketPrice"]
         tmp["price"] = price
         tmp["total"] = price * tmp["shares"]
+        if tmp["total"] < 0.005:
+            db.execute("DELETE FROM holding WHERE user_id=? AND symbol=?", (g.user["id"], asset["symbol"]))
+            db.commit()
+            continue
         profit_calculations = calculate_profit(db, tmp["symbol"], g.user["id"])
         tmp["profitloss"] = profit_calculations[0]
         tmp["avgcost"] = profit_calculations[1]
-        profit_total += tmp["profitloss"]
+        profit_total += tmp["total"]
         asset_rows.append(tmp)
         asset_total += tmp["total"]
     return render_template('trading/portfolio.html', profit=profit_total, assettotal=asset_total, balance=cash,
@@ -115,6 +119,21 @@ def buy(symbol=None):
 def sell(symbol=None):
     db = get_db()
     cash = db.execute('SELECT * FROM users WHERE id=?', (g.user['id'],)).fetchone()['cash']
+
+    if request.method == 'POST':
+        error = None
+        symbol = request.form['symbol']
+        sell_amount = float(request.form['sellamount'])
+        price = yf.Ticker(symbol).info["regularMarketPrice"]
+        shares = sell_amount / price
+        db.execute("INSERT INTO ledger (user_id, symbol, shares, price, type) VALUES (?,?,?,?,?)",
+                   (g.user['id'], symbol, shares, price, 'sell',))
+        db.execute("UPDATE holding SET shares=shares-? WHERE user_id=? AND symbol=?", (shares, g.user['id'], symbol))
+        db.execute(
+            "UPDATE users SET cash=cash+? WHERE id=?", (sell_amount, g.user['id']))
+        db.commit()
+        return redirect(url_for('trading.portfolio'))
+
     assets = db.execute('SELECT * FROM holding WHERE user_id=?', (g.user["id"],)).fetchall()
     asset_rows = []
     for asset in assets:
@@ -122,8 +141,13 @@ def sell(symbol=None):
         tmp = {"symbol": asset['symbol']}
         tmp['market_price'] = market_price
         tmp['value'] = asset['shares'] * market_price
+        if tmp["value"] < 0.005:
+            db.execute("DELETE FROM holding WHERE user_id=? AND symbol=?", (g.user["id"], asset["symbol"]))
+            db.commit()
+            continue
         tmp['purchase_price'] = (calculate_profit(db, tmp["symbol"], g.user["id"]))[1]
         tmp['avg_price'] = tmp['purchase_price'] / asset['shares']
+        tmp['shares'] = asset['shares']
         asset_rows.append(tmp)
 
     return render_template('trading/sell.html', assets=asset_rows)
