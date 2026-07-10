@@ -90,9 +90,15 @@
 </section>
 <section class="lower-grid">
 	<article class="panel-block news-block" id="news">
-		<header class="panel-head"><h3>Market News</h3><span class="panel-sub">Latest headlines</span></header>
+		<header class="panel-head"><h3>Market News</h3><span class="panel-sub">From Seeking Alpha</span></header>
 		<ul class="news-list">
-			<li><span class="news-time">08:12</span>Fed minutes point to steady rates through Q3</li>
+			{% for article in articles %}
+			{% if article[2] > 1 %}
+			<li onclick="window.location='{{ article[1] }}'"><span class="news-time">{{ article[2] }} minutes ago</span>{{ article[0] }}</li>
+			{% else %}
+			<li onclick="window.location='{{ article[1] }}'"><span class="news-time">{{ article[2] }} minute ago</span>{{ article[0] }}</li>
+			{% endif %}
+			{% endfor %}
 		</ul>
 	</article>
 </section>
