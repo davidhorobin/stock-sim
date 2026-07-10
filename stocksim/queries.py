@@ -24,23 +24,29 @@ def get_top_stocks(n):
     ])
 
     res = {}
+    try:
 
-    tmp = []
-    response = yf.screen(q1, sortField='intradaymarketcap', sortAsc=False, size=n)
-    for quote in response['quotes']:
-        tmp += [(quote['symbol'], quote["regularMarketPrice"], quote["marketCap"])]
-    res["top_cap"] = tmp
-
-    tmp = []
-    response = yf.screen(q2, sortField='percentchange', sortAsc=False, size=n)
-    for quote in response['quotes']:
-        tmp += [(quote['symbol'], quote["regularMarketPrice"], quote["regularMarketChangePercent"])]
-    res["top_win"] = tmp
-
-    tmp = []
-    response = yf.screen(q3, sortField='percentchange', sortAsc=True, size=n)
-    for quote in response['quotes']:
-        tmp += [(quote['symbol'], quote["regularMarketPrice"], quote["regularMarketChangePercent"])]
-    res["top_loss"] = tmp
-
+        tmp = []
+        response = yf.screen(q1, sortField='intradaymarketcap', sortAsc=False, size=n)
+        for quote in response['quotes']:
+            tmp += [(quote['symbol'], quote["regularMarketPrice"], quote["marketCap"])]
+        res["top_cap"] = tmp
+    except yf.exceptions.RateLimitError:
+        print("Rate limit error")
+    try:
+        tmp = []
+        response = yf.screen(q2, sortField='percentchange', sortAsc=False, size=n)
+        for quote in response['quotes']:
+            tmp += [(quote['symbol'], quote["regularMarketPrice"], quote["regularMarketChangePercent"])]
+        res["top_win"] = tmp
+    except yf.exceptions.RateLimitError:
+        print("Rate limit error")
+    try:
+        tmp = []
+        response = yf.screen(q3, sortField='percentchange', sortAsc=True, size=n)
+        for quote in response['quotes']:
+            tmp += [(quote['symbol'], quote["regularMarketPrice"], quote["regularMarketChangePercent"])]
+        res["top_loss"] = tmp
+    except yf.exceptions.RateLimitError:
+        print("Rate limit error")
     return res
