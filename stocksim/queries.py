@@ -1,5 +1,6 @@
 import yfinance as yf
 from yfinance import EquityQuery
+from yfinance.exceptions import YFRateLimitError
 
 
 # Top n stocks returned as list of symbol-value tuples
@@ -24,23 +25,29 @@ def get_top_stocks(n):
     ])
 
     res = {}
+    try:
 
-    tmp = []
-    response = yf.screen(q1, sortField='intradaymarketcap', sortAsc=False, size=n)
-    for quote in response['quotes']:
-        tmp += [(quote['symbol'], quote["regularMarketPrice"], quote["marketCap"])]
-    res["top_cap"] = tmp
-
-    tmp = []
-    response = yf.screen(q2, sortField='percentchange', sortAsc=False, size=n)
-    for quote in response['quotes']:
-        tmp += [(quote['symbol'], quote["regularMarketPrice"], quote["regularMarketChangePercent"])]
-    res["top_win"] = tmp
-
-    tmp = []
-    response = yf.screen(q3, sortField='percentchange', sortAsc=True, size=n)
-    for quote in response['quotes']:
-        tmp += [(quote['symbol'], quote["regularMarketPrice"], quote["regularMarketChangePercent"])]
-    res["top_loss"] = tmp
-
+        tmp = []
+        response = yf.screen(q1, sortField='intradaymarketcap', sortAsc=False, size=n)
+        for quote in response['quotes']:
+            tmp += [(quote['symbol'], quote["regularMarketPrice"], quote["marketCap"])]
+        res["top_cap"] = tmp
+    except YFRateLimitError:
+        print("Rate limit error")
+    try:
+        tmp = []
+        response = yf.screen(q2, sortField='percentchange', sortAsc=False, size=n)
+        for quote in response['quotes']:
+            tmp += [(quote['symbol'], quote["regularMarketPrice"], quote["regularMarketChangePercent"])]
+        res["top_win"] = tmp
+    except YFRateLimitError:
+        print("Rate limit error")
+    try:
+        tmp = []
+        response = yf.screen(q3, sortField='percentchange', sortAsc=True, size=n)
+        for quote in response['quotes']:
+            tmp += [(quote['symbol'], quote["regularMarketPrice"], quote["regularMarketChangePercent"])]
+        res["top_loss"] = tmp
+    except YFRateLimitError:
+        print("Rate limit error")
     return res
