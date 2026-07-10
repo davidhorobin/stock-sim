@@ -42,7 +42,7 @@
 			{% if asset["profitloss"]|round(2) > 0 %}
 			<td class="mono change up">{{ "$%.2f"|format(asset["profitloss"]) }}</td>
 			{% elif asset["profitloss"]|round(2) < 0 %}
-			<td class="mono change down">{{ "$%.2f"|format(asset["profitloss"]) }}</td>
+			<td class="mono change down">{{ "-$%.2f"|format(asset["profitloss"]|abs) }}</td>
 			{% else %}
 			<td class="mono">{{ "$%.2f"|format(asset["profitloss"]) }}</td>
 			{% endif %}
@@ -55,4 +55,5 @@
 <p>No assets</p>
 {% endif %}
 <a href="{{ url_for('trading.buy') }}" class="btn-buy">Buy</a>
+<a href="{{ url_for('trading.sell') }}" class="btn-sell">Sell</a>
 {% endblock %}

@@ -21,13 +21,14 @@
 		{% for asset in assets %}
 		<tr>
 			<td class="ticker-cell">{{ asset["symbol"] }}</td>
-			<td class="mono">{{ "$%.2f"|format(asset["value"]) }}</td>
+			<td class="mono">{{ "$%.4f"|format(asset["value"]) }}</td>
 			<td class="mono">{{ "$%.2f"|format(asset["purchase_price"]) }}</td>
 			<td>
 				<form id="sell-{{ loop.index }}" method="post">
+					<input type="hidden" name="symbol" value="{{ asset['symbol'] }}">
 					<input name="sellamount" id="sellamount" required oninput=
-							"this.value=this.value.replace(/(?![0-9])./gmi,'');
-                            updateRow(this, {{ asset["value"] }}, {{ asset["market_price"] - asset["avg_price"] }});">
+							"this.value=this.value.replace(/(?![0-9.])./gmi,'');
+                            updateRow(this, {{ asset["value"] }}, {{ asset["market_price"] }}, {{ asset["avg_price"] }} );">
 				</form>
 			</td>
 			<td id="profit" >0</td>
@@ -39,7 +40,7 @@
 	</table>
 </article>
 <script>
-    function updateRow(input, total, profitPerShare) {
+    function updateRow(input, total, marketPrice, avgPrice) {
         const row = input.closest('tr');
 		const profitCell = row.querySelector('#profit');
         const remainingCell = row.querySelector('#remaining');
@@ -49,7 +50,7 @@
             profitCell.textContent = 0;
             remainingCell.textContent = 0;
         } else {
-			profitCell.textContent = Math.round((profitPerShare * sellAmount) * 10000) / 10000
+            profitCell.textContent = Math.round(((marketPrice - avgPrice) * (sellAmount / marketPrice)) * 10000) / 10000
 			remainingCell.textContent = Math.round((total - sellAmount) * 10000) / 10000
         }
     }

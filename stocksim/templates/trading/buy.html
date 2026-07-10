@@ -25,9 +25,9 @@
 		<tbody>
 		<tr>
 			<td class="ticker-cell">{{ info["symbol"] }}</td>
-			<td class="mono">{{ "$%.2f"|format(info["regularMarketPrice"]) }}</td>
+			<td class="mono">{{ "$%.4f"|format(info["regularMarketPrice"]) }}</td>
 			<td>
-				<form id="buy" method="post"><input name="value" id="value" required oninput="updateShares()"></form>
+				<form id="buy" method="post"><input name="value" id="value" required oninput="this.value=this.value.replace(/(?![0-9.])./gmi,'');updateShares()"></form>
 			</td>
 			<td id="shares">0</td>
 			<td><input form="buy" type="submit" value="Buy"></td>
