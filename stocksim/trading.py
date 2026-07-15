@@ -103,7 +103,7 @@ def sell():
 
     if request.method == 'POST':
         error = None
-        symbol = request.form['symbol']
+        symbol = request.form['symbol'].upper()
         sell_amount = float(request.form['sellamount'])
         if sell_amount < 0.01:
             error = "Sell amount must be greater than $0.01."
