@@ -326,6 +326,11 @@ td.change.down::before {
     font-size: 0.88rem;
     border-bottom: 1px solid var(--border);
     color: var(--text);
+    cursor: pointer;
+}
+
+.news-list li:hover {
+    background: var(--panel-alt);
 }
 
 .news-list li:last-child {
