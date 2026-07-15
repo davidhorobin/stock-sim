@@ -2,10 +2,3 @@ INSERT INTO users (username, password)
 VALUES
     ('test1', 'scrypt:32768:8:1$5LaZkfesFKbrDcXH$cf9be09f67453c8b14dc09629f5e9c741f0841674a68b600386be66600d5d9eb4f3d28a1057b283dace1cd191b273647491a8567382377f4102842f61b21786e'),
     ('test2', 'scrypt:32768:8:1$xkXJ26GXdpRBM3bn$9ca9bcbd6a36bde567d4b175e1b0848b7d3cc523a59ee2e91c2942c72cf851ce0d81030aa65f367940553677a17c47f3a80757aef262ddb4756db1121d4fa149');
-
-INSERT INTO ledger (user_id, symbol, shares, price, type)
-VALUES
-    (1, 'AAPL', 1, 300, 'buy'),
-    (1, 'AAPL', 1, 100, 'sell'),
-    (2, 'GOOG', 5, 1000, 'buy'),
-    (2, 'GOOG', 1, 1000, 'buy');
