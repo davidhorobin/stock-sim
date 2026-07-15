@@ -44,21 +44,18 @@ def test_buy_validate_lookup(client, auth, symbol, message):
     assert response.history[0].location == f'/buy/{symbol}'
 
 
-@pytest.mark.parametrize(('symbol', 'value', 'message'), (
-        ('AAPL', 2000, b'Your portfolio'),
-        ('GOOG', 10000, b'Your portfolio'),
-        ('VOD.L', 0.01, b'Your portfolio'),
+@pytest.mark.parametrize(('symbol', 'value'), (
+        ('AAPL', 2000),
+        ('GOOG', 10000),
+        ('VOD.L', 0.01),
 ))
-def test_buy_success(app, client, auth, monkeypatch, symbol, value, message):
-    def fake_get_stock(symbol):
-        return {"regularMarketPrice": 100}
-
-    monkeypatch.setattr("stocksim.trading.get_stock", fake_get_stock)
+def test_buy_success(app, client, auth, monkeypatch, symbol, value):
+    monkeypatch.setattr("stocksim.trading.get_stock", lambda symbol: {"regularMarketPrice": 100})
 
     auth.login()
     response = client.post(f'/buy/{symbol}', data={'value': value}, follow_redirects=True)
     assert response.status_code == 200
-    assert message in response.data
+    assert b'Your portfolio' in response.data
     assert response.history[0].status_code == 302
     assert response.history[0].location == '/portfolio'
     with app.app_context():
@@ -109,7 +106,64 @@ def test_sell(client, auth):
     assert b"No holdings to sell" in response.data
 
 
-@pytest.mark.parametrize(('symbol', 'value', 'message'), ())
-def test_sell_success(client, auth):
+@pytest.mark.parametrize(('buy_symbol', 'buy_value', 'sell_price', 'sell_symbol', 'sell_amount'), (
+        ('AAPL', 1000, 120, 'AAPL', 1200),
+        ('AAPL', 1000, 50, 'AAPL', 500),
+        ('AAPL', 1000, 100, 'AAPL', 1000),
+        ('AAPL', 1000, 120, 'AAPL', 1100),
+        ('AAPL', 1000, 50, 'AAPL', 400),
+        ('AAPL', 1000, 1000, 'AAPL', 0.01),
+        ('AAPL', 1000, 100, 'AAPL', 999.99),
+))
+def test_sell_success(app, client, auth, monkeypatch, buy_symbol, buy_value, sell_price, sell_symbol, sell_amount):
+    monkeypatch.setattr("stocksim.trading.get_stock", lambda symbol: {"regularMarketPrice": 100})
     auth.login()
-    response = client.get('/sell')
+    client.post(f'/buy/{buy_symbol}', data={'value': buy_value})
+    monkeypatch.setattr("stocksim.trading.get_stock", lambda symbol: {"regularMarketPrice": sell_price})
+    response = client.post('/sell', data={"symbol": sell_symbol, "sellamount": sell_amount}, follow_redirects=True)
+    assert response.status_code == 200
+    assert b'Your portfolio' in response.data
+    assert response.history[0].status_code == 302
+    assert response.history[0].location == '/portfolio'
+
+    with app.app_context():
+        db = get_db()
+        ledger = db.execute('SELECT * FROM ledger WHERE user_id=1').fetchall()
+        assert len(ledger) == 2
+        assert ledger[0]['type'] == 'buy'
+        assert ledger[1]['type'] == 'sell'
+        assert ledger[1]['shares'] * ledger[1]['price'] == sell_amount
+        cash = float(db.execute('SELECT cash FROM users WHERE id=1').fetchone()['cash'])
+        assert cash == 9000 + sell_amount
+        holding = db.execute('SELECT symbol, shares FROM holding WHERE user_id=1').fetchall()
+        if ledger[0]['shares'] * sell_price == sell_amount:
+            assert len(holding) == 0
+        else:
+            assert len(holding) == 1
+
+
+@pytest.mark.parametrize(('buy_symbol', 'buy_value', 'sell_price', 'sell_symbol', 'sell_amount', 'message'), (
+        ('AAPL', 1000, 100, 'AAPL', 1200, "Sell value exceeds held value"),
+        ('AAPL', 1000, 100, 'AAPL', 0, "Value must be"),
+        ('AAPL', 1000, 100, 'AAPL', 0.0001),
+))
+def test_sell_fail(app, client, auth, monkeypatch, buy_symbol, buy_value, sell_price, sell_symbol, sell_amount,
+                   message):
+    monkeypatch.setattr("stocksim.trading.get_stock", lambda symbol: {"regularMarketPrice": 100})
+    auth.login()
+    client.post(f'/buy/{buy_symbol}', data={'value': buy_value})
+    db = get_db()
+    cash = db.execute('SELECT cash FROM users WHERE id=1').fetchone()['cash']
+    holdings = db.execute('SELECT symbol, shares FROM holding WHERE user_id=1').fetchall()
+    monkeypatch.setattr("stocksim.trading.get_stock", lambda symbol: {"regularMarketPrice": sell_price})
+    response = client.post('/sell', data={"symbol": sell_symbol, "sellamount": sell_amount}, follow_redirects=True)
+    assert response.status_code == 200
+    assert message in response.data
+    assert response.request.path == '/sell'
+
+    with app.app_context():
+        ledger = db.execute('SELECT * FROM ledger WHERE user_id=1').fetchall()
+        assert len(ledger) == 1
+        assert ledger[0]['type'] == 'buy'
+        assert cash == db.execute('SELECT cash FROM users WHERE id=1').fetchone()['cash']
+        assert holdings == db.execute('Select symbol, shares FROM holding WHERE user_id=1').fetchall()
