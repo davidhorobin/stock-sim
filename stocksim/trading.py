@@ -58,6 +58,8 @@ def buy(symbol=None):
             value = request.form['value']
             price = get_stock(symbol)["regularMarketPrice"]
             shares = float(value) / price
+            if float(value) <= 0:
+                error = "Please enter a positive value"
             if float(value) > cash:
                 error = "Value of the stock exceeds account balance. Please try again."
 
