@@ -2,7 +2,6 @@ from flask import Blueprint, render_template, request, flash, redirect, url_for
 
 from .queries import get_top_stocks, get_stock, SymbolNotFoundError
 from .utils import strip_tags
-import yfinance as yf
 from urllib.request import urlopen
 import re
 from datetime import *
