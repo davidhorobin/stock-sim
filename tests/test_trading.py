@@ -142,19 +142,27 @@ def test_sell_success(app, client, auth, monkeypatch, buy_symbol, buy_value, sel
             assert len(holding) == 1
 
 
-@pytest.mark.parametrize(('buy_symbol', 'buy_value', 'sell_price', 'sell_symbol', 'sell_amount', 'message'), (
-        ('AAPL', 1000, 100, 'AAPL', 1200, "Sell value exceeds held value"),
-        ('AAPL', 1000, 100, 'AAPL', 0, "Value must be"),
-        ('AAPL', 1000, 100, 'AAPL', 0.0001),
+@pytest.mark.parametrize(('sell_price', 'sell_symbol', 'sell_amount', 'message'), (
+        (100, 'AAPL', 1200, b"Sell value exceeds held value"),
+        (100, 'AAPL', 0, b"Sell amount must be greater than $0.01"),
+        (100, 'AAPL', 0.0001, b"Sell value must be greater than $0.01"),
+        (100, 'GOOG', 1000, b'Can only sell held stocks'),
+        (5, 'AAPL', 1000, b"Sell value exceeds held value"),
+        (100, 'AAPL', -100, b"Sell amount must be greater than $0.01"),
 ))
-def test_sell_fail(app, client, auth, monkeypatch, buy_symbol, buy_value, sell_price, sell_symbol, sell_amount,
+def test_sell_fail(app, client, auth, monkeypatch, sell_price, sell_symbol, sell_amount,
                    message):
+    buy_symbol = 'AAPL'
+    buy_value = 1000
     monkeypatch.setattr("stocksim.trading.get_stock", lambda symbol: {"regularMarketPrice": 100})
     auth.login()
     client.post(f'/buy/{buy_symbol}', data={'value': buy_value})
-    db = get_db()
-    cash = db.execute('SELECT cash FROM users WHERE id=1').fetchone()['cash']
-    holdings = db.execute('SELECT symbol, shares FROM holding WHERE user_id=1').fetchall()
+    cash = 0
+    holdings = 0
+    with app.app_context():
+        db = get_db()
+        cash = db.execute('SELECT cash FROM users WHERE id=1').fetchone()['cash']
+        holdings = db.execute('SELECT symbol, shares FROM holding WHERE user_id=1').fetchall()
     monkeypatch.setattr("stocksim.trading.get_stock", lambda symbol: {"regularMarketPrice": sell_price})
     response = client.post('/sell', data={"symbol": sell_symbol, "sellamount": sell_amount}, follow_redirects=True)
     assert response.status_code == 200
@@ -162,6 +170,7 @@ def test_sell_fail(app, client, auth, monkeypatch, buy_symbol, buy_value, sell_p
     assert response.request.path == '/sell'
 
     with app.app_context():
+        db = get_db()
         ledger = db.execute('SELECT * FROM ledger WHERE user_id=1').fetchall()
         assert len(ledger) == 1
         assert ledger[0]['type'] == 'buy'
