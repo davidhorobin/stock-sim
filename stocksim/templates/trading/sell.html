@@ -5,6 +5,7 @@
 {% endblock %}
 
 {% block content %}
+{% if assets %}
 <article class="market-panel">
 	<table>
 		<thead>
@@ -39,6 +40,9 @@
 		</tbody>
 	</table>
 </article>
+{% else %}
+<p>No holdings to sell.</p>
+{% endif %}
 <script>
     function updateRow(input, total, marketPrice, avgPrice) {
         const row = input.closest('tr');

@@ -114,11 +114,12 @@ def sell():
             error = str(e)
             price = 0
 
-        held_shares = db.execute('SELECT shares FROM holding WHERE user_id=?', (g.user['id'],)).fetchone()['shares']
-        if held_shares is None:
+        holdings = db.execute('SELECT shares FROM holding WHERE user_id=? AND symbol=?',
+                              (g.user['id'], symbol)).fetchone()
+        if holdings is None:
             error = "Can only sell held stocks."
 
-        if (held_shares is not None) and held_shares * price < sell_amount:
+        if (holdings is not None) and holdings['shares'] * price < sell_amount:
             error = "Sell value exceeds held value."
 
         if error is None:
