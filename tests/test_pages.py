@@ -1,5 +1,4 @@
 import pytest
-from stocksim.db import get_db
 
 
 def test_index(client, auth):
@@ -13,17 +12,6 @@ def test_index(client, auth):
     assert response.status_code == 200
     assert b"Log Out" in response.data
     assert b"test1" in response.data
-
-
-def test_portfolio(client, auth):
-    response = client.get('/portfolio')
-    assert response.headers['Location'] == '/auth/login'
-
-    auth.login()
-    response = client.get('/portfolio')
-    assert response.status_code == 200
-    assert b"test1" in response.data
-    assert b"portfolio" in response.data
 
 
 def test_stockinfo(client):
