@@ -3,7 +3,7 @@ from flask import (
 )
 from stocksim.auth import login_required
 from stocksim.db import get_db
-from .queries import get_stock
+from .queries import get_stock, SymbolNotFoundError
 from .utils import calculate_profit
 
 bp = Blueprint('trading', __name__)
@@ -37,7 +37,7 @@ def portfolio():
                            assets=sorted(asset_rows, key=lambda x: x['total'], reverse=True))
 
 
-@bp.route('/buy', methods=['GET', 'POST'])
+@bp.route('/buy/', methods=['GET', 'POST'])
 @bp.route('/buy/<symbol>', methods=['GET', 'POST'])
 @login_required
 def buy(symbol=None):
@@ -49,10 +49,9 @@ def buy(symbol=None):
             symbol = request.form['symbol']
 
             if symbol == '':
-                error = "Please enter a stock symbol"
+                flash("Please enter a stock symbol")
 
-            if error is None:
-                return redirect(url_for('trading.buy', symbol=symbol))
+            return redirect(url_for('trading.buy', symbol=symbol))
 
 
         else:
@@ -80,7 +79,11 @@ def buy(symbol=None):
     if symbol is None:
         info = None
     else:
-        info = get_stock(symbol)
+        try:
+            info = get_stock(symbol)
+        except SymbolNotFoundError as e:
+            flash(str(e))
+            info = None
 
     return render_template('trading/buy.html', balance=cash, info=info)
 
