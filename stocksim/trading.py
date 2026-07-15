@@ -42,7 +42,7 @@ def portfolio():
 @login_required
 def buy(symbol=None):
     db = get_db()
-    cash = db.execute('SELECT * FROM users WHERE id=?', (g.user['id'],)).fetchone()['cash']
+    cash = db.execute('SELECT cash FROM users WHERE id=?', (g.user['id'],)).fetchone()['cash']
     if request.method == 'POST':
         error = None
         if "symbol" in request.form.keys():
