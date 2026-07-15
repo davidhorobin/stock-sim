@@ -34,12 +34,14 @@ def test_stockinfo(client):
 
 
 @pytest.mark.parametrize(('symbol', 'message'), (
-        ('AAPL', b'AAPL'),
-        ('GOOG', b'GOOG'),
-        ('MSFT', b'MSFT'),
+        ('AAPL', b'Apple Inc.'),
+        ('GOOG', b'Price'),
+        ('WRONGSYMBOL', b'Invalid stock symbol'),
+        ('', b'Please enter a stock symbol.'),
 ))
 def test_stockinfo_validate_input(client, symbol, message):
-    response = client.post('/stockinfo/', data={"symbol": symbol})
-    assert response.status_code == 302
-    assert response.headers['Location'] == '/stockinfo/' + symbol
+    response = client.post('/stockinfo/', data={"symbol": symbol}, follow_redirects=True)
+    assert response.status_code == 200
     assert message in response.data
+    assert response.history[0].status_code == 302
+    assert response.history[0].location == f'/stockinfo/{symbol}'

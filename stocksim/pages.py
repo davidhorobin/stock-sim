@@ -30,15 +30,11 @@ def index():
 def stockinfo(symbol=None):
     if request.method == 'POST':
         symbol = request.form['symbol'].upper()
-        error = None
 
         if symbol == '':
-            error = "Please enter a stock symbol"
+            flash('Please enter a stock symbol.')
 
-        if error is None:
-            return redirect(url_for("pages.stockinfo", symbol=symbol))
-
-        flash(error)
+        return redirect(url_for("pages.stockinfo", symbol=symbol))
 
     if symbol is None:
         info = None

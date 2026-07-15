@@ -8,9 +8,8 @@ yf.utils.get_yf_logger().setLevel(logging.CRITICAL)
 
 
 class SymbolNotFoundError(Exception):
-    def __init__(self, symbol):
-        self.symbol = symbol
-        super().__init__(f'Symbol {symbol} not found')
+    def __init__(self, message):
+        super().__init__(message)
 
 
 # Top n stocks returned as list of symbol-value tuples
@@ -68,3 +67,5 @@ def get_stock(symbol):
             return response.info
     except YFRateLimitError:
         raise SymbolNotFoundError(f"Rate limit error")
+    except ValueError:
+        raise SymbolNotFoundError(f"Empty stock symbol")
