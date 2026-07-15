@@ -24,7 +24,6 @@ def index():
     return render_template('pages/index.html', top_stocks=top_stocks, articles=top_stories)
 
 
-# TODO Fix title for /stockinfo/
 @bp.route('/stockinfo/', methods=['GET', 'POST'])
 @bp.route('/stockinfo/<symbol>', methods=['GET', 'POST'])
 def stockinfo(symbol=None):

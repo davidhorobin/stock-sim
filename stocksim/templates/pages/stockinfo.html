@@ -1,7 +1,13 @@
 {% extends 'base.html' %}
 
 {% block header %}
-<h1>{% block title %}Stock info for {{ info["longName"] }} {% endblock %}</h1>
+<h1>{% block title %}
+	{% if info %}
+	Stock info for {{ info["longName"] }}
+	{% else %}
+	Stock info
+	{% endif %}
+	{% endblock %}</h1>
 {% endblock %}
 
 {% block content %}
