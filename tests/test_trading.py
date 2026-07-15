@@ -1,4 +1,6 @@
 import pytest
+
+from stocksim.queries import SymbolNotFoundError
 from stocksim.db import get_db
 
 
@@ -96,6 +98,19 @@ def test_buy_fail(app, client, auth, symbol, value, message):
         assert len(holdings) == 0
         ledger = db.execute('SELECT * FROM ledger WHERE user_id=1').fetchall()
         assert len(ledger) == 0
+
+
+def test_buy_rate_limited(auth, client, monkeypatch):
+    def fake_get_stock(symbol):
+        raise SymbolNotFoundError(f"Rate limit error")
+
+    monkeypatch.setattr("stocksim.trading.get_stock", fake_get_stock)
+    auth.login()
+    response = client.post(f'/buy/AAPL', data={'value': 100}, follow_redirects=True)
+    assert response.status_code == 200
+    assert b"Rate limit error" in response.data
+    assert response.request.path == f'/buy/AAPL'
+    assert len(response.history) == 0
 
 
 def test_sell(client, auth):
