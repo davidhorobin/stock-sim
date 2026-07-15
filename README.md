@@ -1,5 +1,3 @@
-from instance.config import SECRET_KEY
-
 # Stock Simulator
 
 A Flask-based stock market trading simulator, simulating real stocks using
@@ -36,24 +34,15 @@ virtual cash and live market data.
     ```
    python -m venv .venv
    ```
-3. Activate venv \
-   Windows Powershell
-    ```
-    .venv/Scripts/Activate.ps1
-    ```
-   Windows cmd
-    ```
-    .venv/Scripts/activate.bat
-    ```
-   Mac/Linux
-    ```
-    source .venv/bin/activate
-    ```
-4. Install requirements
+3. Activate venv
+   - **Windows PowerShell:** `.venv/Scripts/Activate.ps1`
+   - **Windows cmd:** `.venv/Scripts/activate.bat`
+   - **Mac/Linux:** `source .venv/bin/activate`
+5. Install requirements
     ```
     pip install -r requirements.txt
     ```
-5. Set up configuration. Create an `instance/config.py` containing:
+6. Set up configuration. Create an `instance/config.py` containing:
     ```python
     SECRET_KEY = "your-secret-key"
     ```
@@ -61,14 +50,21 @@ virtual cash and live market data.
     ```python
     python -c 'import secrets; print(secrets.token_hex())'
     ```
-6. Initialise the database
+7. Initialise the database
     ```
     flask --app stocksim init-db
     ```
-7. Run tests
-    ```
-    pytest
-    ```
+8. Run the app
+   ```
+   flask --app stocksim run
+   ```
+   Open your browser and enter the URL returned in the prompt
+   (usually `127.0.0.1:5000`)
+
+### Run tests
+  ```
+  pytest
+  ```
 
 ## Help
 
