@@ -70,18 +70,29 @@ def buy(symbol=None):
                     error = "Value of the stock exceeds account balance. Please try again."
 
                 if error is None:
-                    db.execute('INSERT INTO ledger (user_id, symbol, shares, price, type) VALUES (?,?,?,?,?)',
-                               (g.user['id'], symbol, shares, price, 'buy'))
-                    db.execute('UPDATE users SET cash=? WHERE id=?', (cash - float(value), g.user['id']))
-                    db.commit()
                     try:
-                        db.execute('INSERT INTO holding (user_id, symbol, shares) VALUES (?,?,?)',
-                                   (g.user['id'], symbol, shares))
-                        db.commit()
-                    except db.IntegrityError:
-                        db.execute('UPDATE holding SET shares=shares+? WHERE user_id=?', (shares, g.user['id']))
-                        db.commit()
-                    return redirect(url_for('trading.portfolio'))
+                        db.execute('INSERT INTO ledger (user_id, symbol, shares, price, type) VALUES (?,?,?,?,?)',
+                                   (g.user['id'], symbol, shares, price, 'buy'))
+                        update_row = db.execute('UPDATE users SET cash=? WHERE id=? AND cash>=?',
+                                                (cash - float(value), g.user['id'], float(value)))
+
+                        if update_row.rowcount == 0:
+                            db.rollback()
+                            error = "Value of the stock exceeds account balance. Please try again."
+                        else:
+                            try:
+                                db.execute('INSERT INTO holding (user_id, symbol, shares) VALUES (?,?,?)',
+                                           (g.user['id'], symbol, shares))
+                            except db.IntegrityError:
+                                db.execute('UPDATE holding SET shares=shares+? WHERE user_id=? AND symbol=?',
+                                           (shares, g.user['id'], symbol))
+
+                            db.commit()
+                    except db.Error:
+                        db.rollback()
+                        error = "Database access error. No changes committed."
+                    if error is None:
+                        return redirect(url_for('trading.portfolio'))
 
         flash(error)
     if symbol is None:
@@ -124,14 +135,22 @@ def sell():
 
         if error is None:
             shares = sell_amount / price
-            db.execute("INSERT INTO ledger (user_id, symbol, shares, price, type) VALUES (?,?,?,?,?)",
-                       (g.user['id'], symbol, shares, price, 'sell',))
-            db.execute("UPDATE holding SET shares=shares-? WHERE user_id=? AND symbol=?",
-                       (shares, g.user['id'], symbol))
-            db.execute(
-                "UPDATE users SET cash=cash+? WHERE id=?", (sell_amount, g.user['id']))
-            db.commit()
-            return redirect(url_for('trading.portfolio'))
+            try:
+                db.execute("INSERT INTO ledger (user_id, symbol, shares, price, type) VALUES (?,?,?,?,?)",
+                           (g.user['id'], symbol, shares, price, 'sell',))
+                update_row = db.execute("UPDATE holding SET shares=shares-? WHERE user_id=? AND symbol=? AND shares>=?",
+                                        (shares, g.user['id'], symbol, shares))
+                db.execute("UPDATE users SET cash=cash+? WHERE id=?", (sell_amount, g.user['id']))
+                if update_row.rowcount == 0:
+                    db.rollback()
+                    error = "Sell value exceeds held value."
+                else:
+                    db.commit()
+            except db.Error:
+                db.rollback()
+                error = "Database access error. No changes committed."
+            if error is None:
+                return redirect(url_for('trading.portfolio'))
         flash(error)
 
     assets = db.execute('SELECT * FROM holding WHERE user_id=?', (g.user["id"],)).fetchall()
