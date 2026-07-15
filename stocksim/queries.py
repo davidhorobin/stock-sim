@@ -1,6 +1,16 @@
+import logging
+
 import yfinance as yf
 from yfinance import EquityQuery
 from yfinance.exceptions import YFRateLimitError
+
+yf.utils.get_yf_logger().setLevel(logging.CRITICAL)
+
+
+class SymbolNotFoundError(Exception):
+    def __init__(self, symbol):
+        self.symbol = symbol
+        super().__init__(f'Symbol {symbol} not found')
 
 
 # Top n stocks returned as list of symbol-value tuples
@@ -32,17 +42,13 @@ def get_top_stocks(n):
         for quote in response['quotes']:
             tmp += [(quote['symbol'], quote["regularMarketPrice"], quote["marketCap"])]
         res["top_cap"] = tmp
-    except YFRateLimitError:
-        print("Rate limit error")
-    try:
+
         tmp = []
         response = yf.screen(q2, sortField='percentchange', sortAsc=False, size=n)
         for quote in response['quotes']:
             tmp += [(quote['symbol'], quote["regularMarketPrice"], quote["regularMarketChangePercent"])]
         res["top_win"] = tmp
-    except YFRateLimitError:
-        print("Rate limit error")
-    try:
+
         tmp = []
         response = yf.screen(q3, sortField='percentchange', sortAsc=True, size=n)
         for quote in response['quotes']:
@@ -51,3 +57,14 @@ def get_top_stocks(n):
     except YFRateLimitError:
         print("Rate limit error")
     return res
+
+
+def get_stock(symbol):
+    try:
+        response = yf.Ticker(symbol)
+        if response.info.get("symbol") is None or response.info.get("quoteType") != "EQUITY":
+            raise SymbolNotFoundError(f"Invalid stock symbol: {symbol}")
+        else:
+            return response.info
+    except YFRateLimitError:
+        raise SymbolNotFoundError(f"Rate limit error")

@@ -5,6 +5,7 @@ from werkzeug.exceptions import abort
 import yfinance as yf
 from stocksim.auth import login_required
 from stocksim.db import get_db
+from .queries import get_stock
 
 bp = Blueprint('trading', __name__)
 
@@ -20,7 +21,7 @@ def portfolio():
     profit_total = cash - 10000
     for asset in assets:
         tmp = {"symbol": asset["symbol"], "shares": asset["shares"]}
-        price = yf.Ticker(tmp["symbol"]).info["regularMarketPrice"]
+        price = get_stock(tmp["symbol"])["regularMarketPrice"]
         tmp["price"] = price
         tmp["total"] = price * tmp["shares"]
         if tmp["total"] < 0.005:
@@ -59,7 +60,7 @@ def calculate_profit(db, symbol, user_id):
 
     if running_shares > 0:
         avg_cost = running_cost / running_shares
-        unrealised_profit_loss = (yf.Ticker(symbol).info["regularMarketPrice"] - avg_cost) * running_shares
+        unrealised_profit_loss = (get_stock(symbol)["regularMarketPrice"] - avg_cost) * running_shares
     else:
         unrealised_profit_loss = 0
 
@@ -86,7 +87,7 @@ def buy(symbol=None):
 
         else:
             value = request.form['value']
-            price = yf.Ticker(symbol).info["regularMarketPrice"]
+            price = get_stock(symbol)["regularMarketPrice"]
             shares = float(value) / price
             if float(value) > cash:
                 error = "Value of the stock exceeds account balance. Please try again."
@@ -109,7 +110,7 @@ def buy(symbol=None):
     if symbol is None:
         info = None
     else:
-        info = yf.Ticker(symbol).info
+        info = get_stock(symbol)
 
     return render_template('trading/buy.html', balance=cash, info=info)
 
@@ -124,7 +125,7 @@ def sell(symbol=None):
         error = None
         symbol = request.form['symbol']
         sell_amount = float(request.form['sellamount'])
-        price = yf.Ticker(symbol).info["regularMarketPrice"]
+        price = get_stock(symbol)["regularMarketPrice"]
         shares = sell_amount / price
         db.execute("INSERT INTO ledger (user_id, symbol, shares, price, type) VALUES (?,?,?,?,?)",
                    (g.user['id'], symbol, shares, price, 'sell',))
@@ -137,10 +138,12 @@ def sell(symbol=None):
     assets = db.execute('SELECT * FROM holding WHERE user_id=?', (g.user["id"],)).fetchall()
     asset_rows = []
     for asset in assets:
-        market_price = yf.Ticker(asset['symbol']).info["regularMarketPrice"]
-        tmp = {"symbol": asset['symbol']}
-        tmp['market_price'] = market_price
-        tmp['value'] = asset['shares'] * market_price
+        market_price = get_stock(asset["symbol"])["regularMarketPrice"]
+        tmp = {
+            "symbol": asset['symbol'],
+            'market_price': market_price,
+            'value': asset['shares'] * market_price
+        }
         if tmp["value"] < 0.005:
             db.execute("DELETE FROM holding WHERE user_id=? AND symbol=?", (g.user["id"], asset["symbol"]))
             db.commit()
