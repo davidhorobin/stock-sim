@@ -46,36 +46,42 @@ def buy(symbol=None):
     if request.method == 'POST':
         error = None
         if "symbol" in request.form.keys():
-            symbol = request.form['symbol']
+            symbol = request.form['symbol'].upper()
 
             if symbol == '':
-                flash("Please enter a stock symbol")
+                flash("Please enter a stock symbol.")
 
             return redirect(url_for('trading.buy', symbol=symbol))
 
 
         else:
             value = request.form['value']
-            price = get_stock(symbol)["regularMarketPrice"]
-            shares = float(value) / price
-            if float(value) <= 0:
-                error = "Please enter a positive value"
-            if float(value) > cash:
-                error = "Value of the stock exceeds account balance. Please try again."
+            try:
+                price = get_stock(symbol)["regularMarketPrice"]
+            except SymbolNotFoundError as e:
+                error = str(e)
+            else:
+                shares = float(value) / price
+                if float(value) <= 0:
+                    error = "Please enter a positive value."
+                elif float(value) < 0.01:
+                    error = "Value must be at least $0.01."
+                if float(value) > cash:
+                    error = "Value of the stock exceeds account balance. Please try again."
 
-            if error is None:
-                db.execute('INSERT INTO ledger (user_id, symbol, shares, price, type) VALUES (?,?,?,?,?)',
-                           (g.user['id'], symbol, shares, price, 'buy'))
-                db.execute('UPDATE users SET cash=? WHERE id=?', (cash - float(value), g.user['id']))
-                db.commit()
-                try:
-                    db.execute('INSERT INTO holding (user_id, symbol, shares) VALUES (?,?,?)',
-                               (g.user['id'], symbol, shares))
+                if error is None:
+                    db.execute('INSERT INTO ledger (user_id, symbol, shares, price, type) VALUES (?,?,?,?,?)',
+                               (g.user['id'], symbol, shares, price, 'buy'))
+                    db.execute('UPDATE users SET cash=? WHERE id=?', (cash - float(value), g.user['id']))
                     db.commit()
-                except db.IntegrityError:
-                    db.execute('UPDATE holding SET shares=shares+? WHERE user_id=?', (shares, g.user['id']))
-                    db.commit()
-                return redirect(url_for('trading.portfolio'))
+                    try:
+                        db.execute('INSERT INTO holding (user_id, symbol, shares) VALUES (?,?,?)',
+                                   (g.user['id'], symbol, shares))
+                        db.commit()
+                    except db.IntegrityError:
+                        db.execute('UPDATE holding SET shares=shares+? WHERE user_id=?', (shares, g.user['id']))
+                        db.commit()
+                    return redirect(url_for('trading.portfolio'))
 
         flash(error)
     if symbol is None:
@@ -92,12 +98,10 @@ def buy(symbol=None):
 
 @bp.route('/sell', methods=['GET', 'POST'])
 @login_required
-def sell(symbol=None):
+def sell():
     db = get_db()
-    cash = db.execute('SELECT * FROM users WHERE id=?', (g.user['id'],)).fetchone()['cash']
 
     if request.method == 'POST':
-        error = None
         symbol = request.form['symbol']
         sell_amount = float(request.form['sellamount'])
         price = get_stock(symbol)["regularMarketPrice"]

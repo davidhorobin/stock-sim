@@ -24,7 +24,8 @@ def test_stockinfo(client):
 @pytest.mark.parametrize(('symbol', 'message'), (
         ('AAPL', b'Apple Inc.'),
         ('GOOG', b'Price'),
-        ('WRONGSYMBOL', b'Invalid stock symbol'),
+        ('WRONGSYMBOL', b'Invalid stock symbol: WRONGSYMBOL'),
+        ('VOO', b'Invalid stock symbol: VOO'),
         ('', b'Please enter a stock symbol.'),
 ))
 def test_stockinfo_validate_input(client, symbol, message):
