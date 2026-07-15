@@ -145,7 +145,7 @@ def test_sell_success(app, client, auth, monkeypatch, buy_symbol, buy_value, sel
 @pytest.mark.parametrize(('sell_price', 'sell_symbol', 'sell_amount', 'message'), (
         (100, 'AAPL', 1200, b"Sell value exceeds held value"),
         (100, 'AAPL', 0, b"Sell amount must be greater than $0.01"),
-        (100, 'AAPL', 0.0001, b"Sell value must be greater than $0.01"),
+        (100, 'AAPL', 0.0001, b"Sell amount must be greater than $0.01"),
         (100, 'GOOG', 1000, b'Can only sell held stocks'),
         (5, 'AAPL', 1000, b"Sell value exceeds held value"),
         (100, 'AAPL', -100, b"Sell amount must be greater than $0.01"),
