@@ -102,17 +102,36 @@ def sell():
     db = get_db()
 
     if request.method == 'POST':
+        error = None
         symbol = request.form['symbol']
         sell_amount = float(request.form['sellamount'])
-        price = get_stock(symbol)["regularMarketPrice"]
-        shares = sell_amount / price
-        db.execute("INSERT INTO ledger (user_id, symbol, shares, price, type) VALUES (?,?,?,?,?)",
-                   (g.user['id'], symbol, shares, price, 'sell',))
-        db.execute("UPDATE holding SET shares=shares-? WHERE user_id=? AND symbol=?", (shares, g.user['id'], symbol))
-        db.execute(
-            "UPDATE users SET cash=cash+? WHERE id=?", (sell_amount, g.user['id']))
-        db.commit()
-        return redirect(url_for('trading.portfolio'))
+        if sell_amount < 0.01:
+            error = "Sell amount must be greater than $0.01."
+
+        try:
+            price = get_stock(symbol)["regularMarketPrice"]
+        except SymbolNotFoundError as e:
+            error = str(e)
+            price = 0
+
+        held_shares = db.execute('SELECT shares FROM holding WHERE user_id=?', (g.user['id'],)).fetchone()['shares']
+        if held_shares is None:
+            error = "Can only sell held stocks."
+
+        if (held_shares is not None) and held_shares * price < sell_amount:
+            error = "Sell value exceeds held value."
+
+        if error is None:
+            shares = sell_amount / price
+            db.execute("INSERT INTO ledger (user_id, symbol, shares, price, type) VALUES (?,?,?,?,?)",
+                       (g.user['id'], symbol, shares, price, 'sell',))
+            db.execute("UPDATE holding SET shares=shares-? WHERE user_id=? AND symbol=?",
+                       (shares, g.user['id'], symbol))
+            db.execute(
+                "UPDATE users SET cash=cash+? WHERE id=?", (sell_amount, g.user['id']))
+            db.commit()
+            return redirect(url_for('trading.portfolio'))
+        flash(error)
 
     assets = db.execute('SELECT * FROM holding WHERE user_id=?', (g.user["id"],)).fetchall()
     asset_rows = []
