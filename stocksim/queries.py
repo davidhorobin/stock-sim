@@ -1,7 +1,7 @@
 import logging
 from re import findall
 from requests import get
-
+import os
 from yfinance import screen, Ticker, EquityQuery
 from yfinance.exceptions import YFRateLimitError
 from yfinance.utils import get_yf_logger
@@ -9,7 +9,15 @@ from .extensions import cache
 from curl_cffi import requests as cffi_requests
 
 get_yf_logger().setLevel(logging.CRITICAL)
-session = cffi_requests.Session(impersonate="chrome")
+
+USERNAME = os.environ.get("USERNAME", None)
+PASSWORD = os.environ.get("PASSWORD", None)
+IP = os.environ.get("IP", None)
+if USERNAME is None or PASSWORD is None or IP is None:
+    session = cffi_requests.Session(impersonate="chrome")
+else:
+    proxy_url = f"http://{USERNAME}:{PASSWORD}@{IP}"
+    session = cffi_requests.Session(impersonate="chrome", proxies={"http": proxy_url, "https": proxy_url})
 
 
 class SymbolNotFoundError(Exception):
