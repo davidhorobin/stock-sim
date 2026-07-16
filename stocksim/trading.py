@@ -27,7 +27,7 @@ def portfolio():
             db.execute("DELETE FROM holding WHERE user_id=? AND symbol=?", (g.user["id"], asset["symbol"]))
             db.commit()
             continue
-        profit_calculations = calculate_profit(db, tmp["symbol"], g.user["id"])
+        profit_calculations = calculate_profit(db, tmp["symbol"], price, g.user["id"])
         tmp["profitloss"] = profit_calculations[0]
         tmp["avgcost"] = profit_calculations[1]
         profit_total += tmp["total"]
@@ -166,7 +166,7 @@ def sell():
             db.execute("DELETE FROM holding WHERE user_id=? AND symbol=?", (g.user["id"], asset["symbol"]))
             db.commit()
             continue
-        tmp['purchase_price'] = (calculate_profit(db, tmp["symbol"], g.user["id"]))[1]
+        tmp['purchase_price'] = (calculate_profit(db, tmp["symbol"], market_price, g.user["id"]))[1]
         tmp['avg_price'] = tmp['purchase_price'] / asset['shares']
         tmp['shares'] = asset['shares']
         asset_rows.append(tmp)

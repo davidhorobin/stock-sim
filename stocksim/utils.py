@@ -6,7 +6,7 @@ def strip_tags(s):
     return sub(r'<.*?>', '', s)
 
 
-def calculate_profit(db, symbol, user_id):
+def calculate_profit(db, symbol, price, user_id):
     running_shares = 0
     running_cost = 0
     realised_profit_loss = 0
@@ -28,6 +28,6 @@ def calculate_profit(db, symbol, user_id):
 
     if running_shares > 0:
         avg_cost = running_cost / running_shares
-        unrealised_profit_loss = (get_stock(symbol)["regularMarketPrice"] - avg_cost) * running_shares
+        unrealised_profit_loss = (price - avg_cost) * running_shares
 
     return realised_profit_loss + unrealised_profit_loss, running_cost
