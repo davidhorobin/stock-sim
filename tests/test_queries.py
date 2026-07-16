@@ -1,4 +1,5 @@
 import pytest
+from yfinance.exceptions import YFRateLimitError
 
 from stocksim import queries
 
@@ -38,5 +39,13 @@ def test_get_stock_fail(monkeypatch, symbol, message):
     assert result is None
 
 
-def test_get_stock_limited(app, monkeypatch):
-    assert True
+def test_get_stock_limited(monkeypatch):
+    def fake_fetch(symbol):
+        raise YFRateLimitError()
+
+    monkeypatch.setattr("stocksim.queries.Ticker", fake_fetch)
+    result = None
+    with pytest.raises(queries.SymbolNotFoundError) as e:
+        result = queries.get_stock("AAPL")
+    assert "Rate limit error" in str(e)
+    assert result is None

@@ -3,6 +3,7 @@ import tempfile
 import pytest
 from stocksim import create_app
 from stocksim.db import get_db, init_db
+from stocksim.extensions import cache
 
 with open(os.path.join(os.path.dirname(__file__), "data.sql"), "rb") as f:
     _data_sql = f.read().decode("utf8")
@@ -53,3 +54,10 @@ class AuthActions(object):
 @pytest.fixture
 def auth(client):
     return AuthActions(client)
+
+
+@pytest.fixture(autouse=True)
+def clear_cache(app):
+    yield
+    with app.app_context():
+        cache.clear()
