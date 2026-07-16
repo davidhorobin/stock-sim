@@ -17,7 +17,7 @@ CREATE TABLE ledger (
     price REAL NOT NULL,
     type TEXT NOT NULL CHECK (type IN ('buy', 'sell')),
     created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES user (id)
+    FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
 CREATE TABLE holding (
