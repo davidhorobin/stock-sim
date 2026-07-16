@@ -1,9 +1,13 @@
 import logging
+from re import findall
+from urllib.request import urlopen
 
-import yfinance as yf
 from yfinance import screen, Ticker, EquityQuery
 from yfinance.exceptions import YFRateLimitError
 from yfinance.utils import get_yf_logger
+
+from .utils import format_articles
+from .extensions import cache
 
 get_yf_logger().setLevel(logging.CRITICAL)
 
@@ -70,3 +74,13 @@ def get_stock(symbol):
         raise SymbolNotFoundError(f"Rate limit error")
     except ValueError:
         raise SymbolNotFoundError(f"Empty stock symbol")
+
+
+@cache.cached(timeout=150)
+def get_top_articles():
+    print("Function ran.")
+    url = "https://seekingalpha.com/market_currents.xml"
+    xml = urlopen(url).read().decode('utf-8')
+    articles = findall(r"<title>.*</title>|<link>.*</link>|<pubDate>.*</pubDate>", xml)
+
+    return articles
