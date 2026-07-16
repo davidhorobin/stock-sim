@@ -19,51 +19,67 @@ class SymbolNotFoundError(Exception):
 
 # Top n stocks returned as list of symbol-value tuples
 def get_top_stocks(n):
-    q1 = EquityQuery('and', [
+    res = {}
+    try:
+        res["top_cap"] = get_top_cap(n)
+        res["top_win"] = get_top_win(n)
+        res["top_loss"] = get_top_loss(n)
+    except YFRateLimitError:
+        print("Rate limit error")
+    return res
+
+
+@cache.memoize(timeout=600)
+def get_top_cap(n):
+    print("Got top cap")
+    q = EquityQuery('and', [
         EquityQuery('eq', ['region', 'us']),
         EquityQuery('gte', ['intradaymarketcap', 4000000000])
     ])
-    q2 = EquityQuery('and', [
+    tmp = []
+    response = screen(q, sortField='intradaymarketcap', sortAsc=False, size=n)
+    for quote in response['quotes']:
+        tmp += [(quote['symbol'], quote["regularMarketPrice"], quote["marketCap"])]
+    return tmp
+
+
+@cache.memoize(timeout=120)
+def get_top_win(n):
+    print("Got top win")
+    q = EquityQuery('and', [
         EquityQuery('eq', ['region', 'us']),
         EquityQuery('gte', ['intradaymarketcap', 2000000000]),
         EquityQuery('gte', ['intradayprice', 5]),
         EquityQuery('gt', ['dayvolume', 15000]),
         EquityQuery('gt', ['percentchange', 3])
     ])
-    q3 = EquityQuery('and', [
+    tmp = []
+    response = screen(q, sortField='percentchange', sortAsc=False, size=n)
+    for quote in response['quotes']:
+        tmp += [(quote['symbol'], quote["regularMarketPrice"], quote["regularMarketChangePercent"])]
+    return tmp
+
+
+@cache.memoize(timeout=120)
+def get_top_loss(n):
+    print("Got top loss")
+    q = EquityQuery('and', [
         EquityQuery('eq', ['region', 'us']),
         EquityQuery('gte', ['intradaymarketcap', 2000000000]),
         EquityQuery('gte', ['intradayprice', 5]),
         EquityQuery('gt', ['dayvolume', 20000]),
         EquityQuery('lt', ['percentchange', -2.5])
     ])
-
-    res = {}
-    try:
-
-        tmp = []
-        response = screen(q1, sortField='intradaymarketcap', sortAsc=False, size=n)
-        for quote in response['quotes']:
-            tmp += [(quote['symbol'], quote["regularMarketPrice"], quote["marketCap"])]
-        res["top_cap"] = tmp
-
-        tmp = []
-        response = screen(q2, sortField='percentchange', sortAsc=False, size=n)
-        for quote in response['quotes']:
-            tmp += [(quote['symbol'], quote["regularMarketPrice"], quote["regularMarketChangePercent"])]
-        res["top_win"] = tmp
-
-        tmp = []
-        response = screen(q3, sortField='percentchange', sortAsc=True, size=n)
-        for quote in response['quotes']:
-            tmp += [(quote['symbol'], quote["regularMarketPrice"], quote["regularMarketChangePercent"])]
-        res["top_loss"] = tmp
-    except YFRateLimitError:
-        print("Rate limit error")
-    return res
+    tmp = []
+    response = screen(q, sortField='percentchange', sortAsc=True, size=n)
+    for quote in response['quotes']:
+        tmp += [(quote['symbol'], quote["regularMarketPrice"], quote["regularMarketChangePercent"])]
+    return tmp
 
 
+@cache.memoize(timeout=15)
 def get_stock(symbol):
+    print(f"Got stock {symbol}")
     try:
         response = Ticker(symbol)
         if response.info.get("symbol") is None or response.info.get("quoteType") != "EQUITY":
@@ -76,9 +92,9 @@ def get_stock(symbol):
         raise SymbolNotFoundError(f"Empty stock symbol")
 
 
-@cache.cached(timeout=150)
+@cache.memoize(timeout=120)
 def get_top_articles():
-    print("Function ran.")
+    print("Got top articles")
     url = "https://seekingalpha.com/market_currents.xml"
     xml = urlopen(url).read().decode('utf-8')
     articles = findall(r"<title>.*</title>|<link>.*</link>|<pubDate>.*</pubDate>", xml)
