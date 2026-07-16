@@ -6,8 +6,10 @@ from yfinance import screen, Ticker, EquityQuery
 from yfinance.exceptions import YFRateLimitError
 from yfinance.utils import get_yf_logger
 from .extensions import cache
+from curl_cffi import requests as cffi_requests
 
 get_yf_logger().setLevel(logging.CRITICAL)
+session = cffi_requests.Session(impersonate="chrome")
 
 
 class SymbolNotFoundError(Exception):
@@ -34,7 +36,7 @@ def get_top_cap(n):
         EquityQuery('gte', ['intradaymarketcap', 4000000000])
     ])
     tmp = []
-    response = screen(q, sortField='intradaymarketcap', sortAsc=False, size=n)
+    response = screen(q, sortField='intradaymarketcap', sortAsc=False, size=n, session=session)
     for quote in response['quotes']:
         tmp += [(quote['symbol'], quote["regularMarketPrice"], quote["marketCap"])]
     return tmp
@@ -50,7 +52,7 @@ def get_top_win(n):
         EquityQuery('gt', ['percentchange', 3])
     ])
     tmp = []
-    response = screen(q, sortField='percentchange', sortAsc=False, size=n)
+    response = screen(q, sortField='percentchange', sortAsc=False, size=n, session=session)
     for quote in response['quotes']:
         tmp += [(quote['symbol'], quote["regularMarketPrice"], quote["regularMarketChangePercent"])]
     return tmp
@@ -66,7 +68,7 @@ def get_top_loss(n):
         EquityQuery('lt', ['percentchange', -2.5])
     ])
     tmp = []
-    response = screen(q, sortField='percentchange', sortAsc=True, size=n)
+    response = screen(q, sortField='percentchange', sortAsc=True, size=n, session=session)
     for quote in response['quotes']:
         tmp += [(quote['symbol'], quote["regularMarketPrice"], quote["regularMarketChangePercent"])]
     return tmp
@@ -75,7 +77,7 @@ def get_top_loss(n):
 @cache.memoize(timeout=15)
 def get_stock(symbol):
     try:
-        response = Ticker(symbol)
+        response = Ticker(symbol, session=session)
         if response.info.get("symbol") is None or response.info.get("quoteType") != "EQUITY":
             raise SymbolNotFoundError(f"Invalid stock symbol: {symbol}")
         else:
