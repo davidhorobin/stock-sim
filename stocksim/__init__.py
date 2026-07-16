@@ -13,7 +13,7 @@ def create_app(test_config=None):
         CACHE_DEFAULT_TIMEOUT=120,
     )
     if test_config is None:
-        app.config.from_pyfile('config.py')
+        app.config.from_pyfile('config.py', silent=True)
     else:
         app.config.from_mapping(test_config)
 
