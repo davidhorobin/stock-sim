@@ -1,10 +1,11 @@
 import logging
 
 import yfinance as yf
-from yfinance import EquityQuery
+from yfinance import screen, Ticker, EquityQuery
 from yfinance.exceptions import YFRateLimitError
+from yfinance.utils import get_yf_logger
 
-yf.utils.get_yf_logger().setLevel(logging.CRITICAL)
+get_yf_logger().setLevel(logging.CRITICAL)
 
 
 class SymbolNotFoundError(Exception):
@@ -37,19 +38,19 @@ def get_top_stocks(n):
     try:
 
         tmp = []
-        response = yf.screen(q1, sortField='intradaymarketcap', sortAsc=False, size=n)
+        response = screen(q1, sortField='intradaymarketcap', sortAsc=False, size=n)
         for quote in response['quotes']:
             tmp += [(quote['symbol'], quote["regularMarketPrice"], quote["marketCap"])]
         res["top_cap"] = tmp
 
         tmp = []
-        response = yf.screen(q2, sortField='percentchange', sortAsc=False, size=n)
+        response = screen(q2, sortField='percentchange', sortAsc=False, size=n)
         for quote in response['quotes']:
             tmp += [(quote['symbol'], quote["regularMarketPrice"], quote["regularMarketChangePercent"])]
         res["top_win"] = tmp
 
         tmp = []
-        response = yf.screen(q3, sortField='percentchange', sortAsc=True, size=n)
+        response = screen(q3, sortField='percentchange', sortAsc=True, size=n)
         for quote in response['quotes']:
             tmp += [(quote['symbol'], quote["regularMarketPrice"], quote["regularMarketChangePercent"])]
         res["top_loss"] = tmp
@@ -60,7 +61,7 @@ def get_top_stocks(n):
 
 def get_stock(symbol):
     try:
-        response = yf.Ticker(symbol)
+        response = Ticker(symbol)
         if response.info.get("symbol") is None or response.info.get("quoteType") != "EQUITY":
             raise SymbolNotFoundError(f"Invalid stock symbol: {symbol}")
         else:

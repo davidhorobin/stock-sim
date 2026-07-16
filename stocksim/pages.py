@@ -3,8 +3,8 @@ from flask import Blueprint, render_template, request, flash, redirect, url_for
 from .queries import get_top_stocks, get_stock, SymbolNotFoundError
 from .utils import strip_tags
 from urllib.request import urlopen
-import re
-from datetime import *
+from re import findall
+from datetime import datetime, timezone
 
 bp = Blueprint('pages', __name__)
 
@@ -13,7 +13,7 @@ bp = Blueprint('pages', __name__)
 def index():
     url = "https://seekingalpha.com/market_currents.xml"
     xml = urlopen(url).read().decode('utf-8')
-    articles = re.findall(r"<title>.*</title>|<link>.*</link>|<pubDate>.*</pubDate>", xml)
+    articles = findall(r"<title>.*</title>|<link>.*</link>|<pubDate>.*</pubDate>", xml)
     top_stories = []
     for i in range(5):
         article_time = datetime.strptime(strip_tags(articles[3 * i + 4]), "%a, %d %b %Y %H:%M:%S %z")
