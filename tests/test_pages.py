@@ -1,4 +1,5 @@
 import pytest
+from yfinance.exceptions import YFRateLimitError
 
 
 def test_index(client, auth, monkeypatch):
@@ -17,6 +18,15 @@ def test_index(client, auth, monkeypatch):
     assert response.status_code == 200
     assert b"Log Out" in response.data
     assert b"test1" in response.data
+
+
+def test_index_stocks_rate_limited(client, monkeypatch):
+    def fake_top_stocks(n):
+        raise YFRateLimitError
+
+    monkeypatch.setattr('stocksim.pages.get_top_stocks', lambda: [])
+    response = client.get('/')
+    assert response.status_code == 200
 
 
 def test_stockinfo(client):

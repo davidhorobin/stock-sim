@@ -23,7 +23,7 @@ def get_top_stocks(n):
         res["top_win"] = get_top_win(n)
         res["top_loss"] = get_top_loss(n)
     except YFRateLimitError:
-        print("Rate limit error")
+        raise SymbolNotFoundError(f"Rate limit error")
     return res
 
 

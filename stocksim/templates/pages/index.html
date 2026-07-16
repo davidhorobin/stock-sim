@@ -6,6 +6,7 @@
 
 {% block content %}
 <section class="tables-section" id="markets">
+
 	<div class="tables-grid">
 
 		<article class="market-panel">
@@ -22,6 +23,9 @@
 				</tr>
 				</thead>
 				<tbody>
+				{% if top_stocks is string %}
+				<tr><td class="mono" colspan="4">{{top_stocks}}: please try again later.</td></tr>
+				{% else %}
 				{% for stock in top_stocks["top_cap"] %}
 				<tr onclick="window.location='{{ url_for('pages.stockinfo', symbol=stock[0]) }}'">
 					<td class="rank">{{ loop.index }}</td>
@@ -30,6 +34,7 @@
 					<td class="mono">{{ "$%sT" % (stock[2]|round(-10) / 1000000000000) }}</td>
 				</tr>
 				{% endfor %}
+				{% endif %}
 				</tbody>
 			</table>
 		</article>
@@ -48,6 +53,9 @@
 				</tr>
 				</thead>
 				<tbody>
+				{% if top_stocks is string %}
+				<tr><td class="mono" colspan="4">{{top_stocks}}: please try again later.</td></tr>
+				{% else %}
 				{% for stock in top_stocks["top_win"] %}
 				<tr onclick="window.location='{{ url_for('pages.stockinfo', symbol=stock[0]) }}'">
 					<td class="rank">{{ loop.index }}</td>
@@ -56,6 +64,7 @@
 					<td class="mono change up">{{ "%s%%" % (stock[2]|round(2)) }}</td>
 				</tr>
 				{% endfor %}
+				{% endif %}
 				</tbody>
 			</table>
 		</article>
@@ -74,6 +83,9 @@
 				</tr>
 				</thead>
 				<tbody>
+				{% if top_stocks is string %}
+				<tr><td class="mono" colspan="4">{{top_stocks}}: please try again later.</td></tr>
+				{% else %}
 				{% for stock in top_stocks["top_loss"] %}
 				<tr onclick="window.location='{{ url_for('pages.stockinfo', symbol=stock[0]) }}'">
 					<td class="rank">{{ loop.index }}</td>
@@ -82,6 +94,7 @@
 					<td class="mono change down">{{ "%s%%" % (stock[2]|round(2)|abs) }}</td>
 				</tr>
 				{% endfor %}
+				{% endif %}
 				</tbody>
 			</table>
 		</article>

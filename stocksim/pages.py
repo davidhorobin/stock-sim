@@ -13,7 +13,10 @@ def index():
         top_stories = format_articles(top_stories)[:5]
     except SymbolNotFoundError as e:
         top_stories = [("No response from SeekingAlpha", "", 0)]
-    top_stocks = get_top_stocks(5)
+    try:
+        top_stocks = get_top_stocks(5)
+    except SymbolNotFoundError as e:
+        top_stocks = str(e)
     return render_template('pages/index.html', top_stocks=top_stocks, articles=top_stories)
 
 
