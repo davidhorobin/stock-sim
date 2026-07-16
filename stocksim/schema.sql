@@ -26,5 +26,5 @@ CREATE TABLE holding (
     symbol TEXT NOT NULL,
     shares REAL NOT NULL,
     UNIQUE (user_id, symbol),
-    FOREIGN KEY (user_id) REFERENCES user (id)
+    FOREIGN KEY (user_id) REFERENCES users (id)
 );
