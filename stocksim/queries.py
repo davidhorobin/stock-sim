@@ -31,7 +31,6 @@ def get_top_stocks(n):
 
 @cache.memoize(timeout=600)
 def get_top_cap(n):
-    print("Got top cap")
     q = EquityQuery('and', [
         EquityQuery('eq', ['region', 'us']),
         EquityQuery('gte', ['intradaymarketcap', 4000000000])
@@ -45,7 +44,6 @@ def get_top_cap(n):
 
 @cache.memoize(timeout=120)
 def get_top_win(n):
-    print("Got top win")
     q = EquityQuery('and', [
         EquityQuery('eq', ['region', 'us']),
         EquityQuery('gte', ['intradaymarketcap', 2000000000]),
@@ -62,7 +60,6 @@ def get_top_win(n):
 
 @cache.memoize(timeout=120)
 def get_top_loss(n):
-    print("Got top loss")
     q = EquityQuery('and', [
         EquityQuery('eq', ['region', 'us']),
         EquityQuery('gte', ['intradaymarketcap', 2000000000]),
@@ -79,7 +76,6 @@ def get_top_loss(n):
 
 @cache.memoize(timeout=15)
 def get_stock(symbol):
-    print(f"Got stock {symbol}")
     try:
         response = Ticker(symbol)
         if response.info.get("symbol") is None or response.info.get("quoteType") != "EQUITY":
@@ -94,7 +90,6 @@ def get_stock(symbol):
 
 @cache.memoize(timeout=120)
 def get_top_articles():
-    print("Got top articles")
     url = "https://seekingalpha.com/market_currents.xml"
     xml = urlopen(url).read().decode('utf-8')
     articles = findall(r"<title>.*</title>|<link>.*</link>|<pubDate>.*</pubDate>", xml)
