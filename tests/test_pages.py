@@ -1,11 +1,16 @@
 import pytest
 
 
-def test_index(client, auth):
+def test_index(client, auth, monkeypatch):
+    monkeypatch.setattr('stocksim.pages.get_top_articles', lambda: [])
+    monkeypatch.setattr('stocksim.pages.get_top_stocks', lambda n: [])
     response = client.get('/')
     assert response.status_code == 200
     assert b"Log In" in response.data
     assert b"Register" in response.data
+    assert b"Top Market Capitalisation" in response.data
+    assert b"Top Gainers Today" in response.data
+    assert b"Top Losers Today" in response.data
 
     auth.login()
     response = client.get('/')
