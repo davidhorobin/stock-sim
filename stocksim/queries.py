@@ -1,12 +1,10 @@
 import logging
 from re import findall
-from urllib.request import urlopen
+from requests import get
 
 from yfinance import screen, Ticker, EquityQuery
 from yfinance.exceptions import YFRateLimitError
 from yfinance.utils import get_yf_logger
-
-from .utils import format_articles
 from .extensions import cache
 
 get_yf_logger().setLevel(logging.CRITICAL)
@@ -91,7 +89,8 @@ def get_stock(symbol):
 @cache.memoize(timeout=120)
 def get_top_articles():
     url = "https://seekingalpha.com/market_currents.xml"
-    xml = urlopen(url).read().decode('utf-8')
-    articles = findall(r"<title>.*</title>|<link>.*</link>|<pubDate>.*</pubDate>", xml)
-
+    response = get(url)
+    if response.status_code != 200:
+        raise SymbolNotFoundError(f"No response from SeekingAlpha.")
+    articles = findall(r"<title>.*</title>|<link>.*</link>|<pubDate>.*</pubDate>", response.text)
     return articles

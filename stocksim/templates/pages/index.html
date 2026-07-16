@@ -93,7 +93,7 @@
 		<header class="panel-head"><h3>Market News</h3><span class="panel-sub">From Seeking Alpha</span></header>
 		<ul class="news-list">
 			{% for article in articles %}
-			{% if article[2] > 1 %}
+			{% if article[2] != 1 %}
 			<li onclick="window.location='{{ article[1] }}'"><span class="news-time">{{ article[2] }} minutes ago</span>{{ article[0] }}</li>
 			{% else %}
 			<li onclick="window.location='{{ article[1] }}'"><span class="news-time">{{ article[2] }} minute ago</span>{{ article[0] }}</li>

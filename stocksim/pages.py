@@ -8,8 +8,11 @@ bp = Blueprint('pages', __name__)
 
 @bp.route('/')
 def index():
-    top_stories = get_top_articles()
-    top_stories = format_articles(top_stories)[:5]
+    try:
+        top_stories = get_top_articles()
+        top_stories = format_articles(top_stories)[:5]
+    except SymbolNotFoundError as e:
+        top_stories = [("No response from SeekingAlpha", "", 0)]
     top_stocks = get_top_stocks(5)
     return render_template('pages/index.html', top_stocks=top_stocks, articles=top_stories)
 
