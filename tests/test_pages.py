@@ -22,13 +22,23 @@ def test_index(client, auth, monkeypatch):
 
 
 def test_index_stocks_rate_limited(client, monkeypatch):
-    def fake_top_stocks(n):
+    def fake_rate_limited(n):
         raise SymbolNotFoundError("Rate limit error")
 
-    monkeypatch.setattr('stocksim.pages.get_top_stocks', fake_top_stocks)
+    monkeypatch.setattr('stocksim.pages.get_top_stocks', fake_rate_limited)
     response = client.get('/')
     assert response.status_code == 200
     assert b"Rate limit error" in response.data
+
+
+def test_market_news_rate_limited(client, monkeypatch):
+    def fake_rate_limited():
+        raise SymbolNotFoundError("No response from SeekingAlpha")
+
+    monkeypatch.setattr('stocksim.pages.get_top_articles', fake_rate_limited)
+    response = client.get('/')
+    assert response.status_code == 200
+    assert b"No response from SeekingAlpha" in response.data
 
 
 def test_stockinfo(client):
