@@ -51,6 +51,33 @@ def test_get_stock_rate_limited(monkeypatch):
     assert result is None
 
 
+@pytest.mark.parametrize(("top_cap", "top_win", "top_loss"), (
+        (True, True, True),
+        (True, True, False),
+        (True, False, True),
+        (True, False, False),
+        (False, True, True),
+        (False, True, False),
+        (False, False, True),
+))
+def test_top_stock_rate_limited(monkeypatch, top_cap, top_win, top_loss):
+    def fake_rate_limited(symbol):
+        raise YFRateLimitError()
+
+    if top_cap:
+        monkeypatch.setattr("stocksim.queries.get_top_cap", fake_rate_limited)
+    if top_win:
+        monkeypatch.setattr("stocksim.queries.get_top_win", fake_rate_limited)
+    if top_loss:
+        monkeypatch.setattr("stocksim.queries.get_top_loss", fake_rate_limited)
+
+    result = None
+    with pytest.raises(queries.SymbolNotFoundError) as e:
+        result = queries.get_top_stocks(5)
+    assert "Rate limit error" in str(e)
+    assert result is None
+
+
 @pytest.mark.parametrize("code", (
         408,
         403,
