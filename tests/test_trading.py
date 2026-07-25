@@ -1,4 +1,5 @@
 import pytest
+from peewee import sqlite3
 
 from stocksim.queries import SymbolNotFoundError
 from stocksim.db import get_db
@@ -111,6 +112,28 @@ def test_buy_rate_limited(auth, client, monkeypatch):
     assert b"Rate limit error" in response.data
     assert response.request.path == f'/buy/AAPL'
     assert len(response.history) == 0
+
+
+def test_buy_again(app, auth, client, monkeypatch):
+    monkeypatch.setattr("stocksim.trading.get_stock", lambda _: {"regularMarketPrice": 100})
+    auth.login()
+    response = client.post(f'/buy/AAPL', data={'value': 1000}, follow_redirects=True)
+    assert response.status_code == 200
+    assert b'Your portfolio' in response.data
+    assert response.history[0].status_code == 302
+    assert response.history[0].location == '/portfolio'
+    response = client.post(f'/buy/AAPL', data={'value': 1500}, follow_redirects=True)
+    assert response.status_code == 200
+    assert b'Your portfolio' in response.data
+    assert response.history[0].status_code == 302
+    assert response.history[0].location == '/portfolio'
+    with app.app_context():
+        db = get_db()
+        assert db.execute('SELECT cash FROM users WHERE id=1').fetchone()['cash'] == 7500
+        assert len(db.execute('SELECT 1 FROM ledger WHERE user_id=1').fetchall()) == 2
+        holding = db.execute('SELECT symbol, shares FROM holding WHERE user_id=1').fetchall()
+        assert len(holding) == 1
+        assert holding[0]['shares'] == 25
 
 
 def test_sell(client, auth):
