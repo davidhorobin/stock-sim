@@ -115,19 +115,18 @@ def sell():
         if sell_amount < 0.01:
             error = "Sell amount must be greater than $0.01."
 
+        price = 0
         try:
             price = get_stock(symbol)["regularMarketPrice"]
         except SymbolNotFoundError as e:
             error = str(e)
-            price = 0
-
-        holdings = db.execute('SELECT shares FROM holding WHERE user_id=? AND symbol=?',
-                              (g.user['id'], symbol)).fetchone()
-        if holdings is None:
-            error = "Can only sell held stocks."
-
-        if (holdings is not None) and holdings['shares'] * price < sell_amount:
-            error = "Sell value exceeds held value."
+        else:
+            holdings = db.execute('SELECT shares FROM holding WHERE user_id=? AND symbol=?',
+                                  (g.user['id'], symbol)).fetchone()
+            if holdings is None:
+                error = "Can only sell held stocks."
+            elif holdings['shares'] * price < sell_amount:
+                error = "Sell value exceeds held value."
 
         if error is None:
             shares = sell_amount / price
