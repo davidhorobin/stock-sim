@@ -73,14 +73,16 @@ def buy(symbol=None):
                     try:
                         db.execute('INSERT INTO ledger (user_id, symbol, shares, price, type) VALUES (?,?,?,?,?)',
                                    (g.user['id'], symbol, shares, price, 'buy'))
-                        db.execute('UPDATE users SET cash=? WHERE id=?',
+                        db.execute('UPDATE users SET cash=? WHERE id=? AND cash>=?',
                                    (cash - float(value), g.user['id'], float(value)))
+
                         try:
                             db.execute('INSERT INTO holding (user_id, symbol, shares) VALUES (?,?,?)',
                                        (g.user['id'], symbol, shares))
                         except db.IntegrityError:
                             db.execute('UPDATE holding SET shares=shares+? WHERE user_id=? AND symbol=?',
                                        (shares, g.user['id'], symbol))
+
                         db.commit()
                     except db.Error:
                         db.rollback()
