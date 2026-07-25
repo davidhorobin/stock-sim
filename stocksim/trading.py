@@ -133,14 +133,11 @@ def sell():
             try:
                 db.execute("INSERT INTO ledger (user_id, symbol, shares, price, type) VALUES (?,?,?,?,?)",
                            (g.user['id'], symbol, shares, price, 'sell',))
-                update_row = db.execute("UPDATE holding SET shares=shares-? WHERE user_id=? AND symbol=? AND shares>=?",
-                                        (shares, g.user['id'], symbol, shares))
+                db.execute("UPDATE holding SET shares=shares-? WHERE user_id=? AND symbol=? AND shares>=?",
+                           (shares, g.user['id'], symbol, shares))
                 db.execute("UPDATE users SET cash=cash+? WHERE id=?", (sell_amount, g.user['id']))
-                if update_row.rowcount == 0:
-                    db.rollback()
-                    error = "Sell value exceeds held value."
-                else:
-                    db.commit()
+
+                db.commit()
             except db.Error:
                 db.rollback()
                 error = "Database access error. No changes committed."
