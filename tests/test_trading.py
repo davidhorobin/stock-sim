@@ -1,6 +1,5 @@
 import pytest
-from peewee import sqlite3
-
+import re
 from stocksim.queries import SymbolNotFoundError
 from stocksim.db import get_db
 
@@ -163,6 +162,40 @@ def test_sell(client, auth):
     assert b"No holdings to sell" in response.data
 
 
+def test_sell_assets_exist(app, auth, client, monkeypatch):
+    auth.login()
+    monkeypatch.setattr("stocksim.trading.get_stock", lambda _: {"regularMarketPrice": 100})
+    with app.app_context():
+        db = get_db()
+        db.execute("INSERT INTO holding (user_id, symbol, shares) VALUES (?, ?, ?)", (1, "AAPL", 1))
+        db.execute("INSERT INTO holding (user_id, symbol, shares) VALUES (?, ?, ?)", (1, "GOOG", 4))
+        db.commit()
+
+    response = client.get('/sell')
+    assert response.status_code == 200
+    assert b"AAPL" in response.data
+    assert b"GOOG" in response.data
+    assert re.search(r".*AAPL.*GOOG.*", response.data.decode("utf-8"), re.DOTALL) is not None
+
+
+def test_sell_low_value(app, auth, client, monkeypatch):
+    auth.login()
+    monkeypatch.setattr("stocksim.trading.get_stock", lambda _: {"regularMarketPrice": 100})
+    with app.app_context():
+        db = get_db()
+        db.execute("INSERT INTO holding (user_id, symbol, shares) VALUES (?, ?, ?)", (1, "AAPL", 0.00000001))
+        db.commit()
+
+    response = client.get('/sell')
+    assert response.status_code == 200
+    assert b"Sell" in response.data
+    assert b"No holdings to sell" in response.data
+
+    with app.app_context():
+        db = get_db()
+        assert len(db.execute('SELECT 1 FROM holding WHERE user_id=1').fetchall()) == 0
+
+
 @pytest.mark.parametrize(('buy_symbol', 'buy_value', 'sell_price', 'sell_symbol', 'sell_amount'), (
         ('AAPL', 1000, 120, 'AAPL', 1200),
         ('AAPL', 1000, 50, 'AAPL', 500),
@@ -256,3 +289,22 @@ def test_sell_fail_symbol(app, client, auth, monkeypatch, message):
     with app.app_context():
         db = get_db()
         assert cash == db.execute('SELECT cash FROM users WHERE id=1').fetchone()['cash']
+
+
+def test_sell_error(app, auth, client, monkeypatch):
+    monkeypatch.setattr("stocksim.trading.get_stock", lambda _: {"regularMarketPrice": 100})
+    auth.login()
+    client.post(f'/buy/AAPL', data={'value': 1000}, follow_redirects=True)
+
+    with app.app_context():
+        db = get_db()
+        db.execute("ALTER TABLE users DROP COLUMN cash")
+
+    response = client.post(f'/sell', data={'symbol': 'AAPL', 'sellamount': 1000}, follow_redirects=True)
+    assert response.status_code == 200
+    assert b"Database access error" in response.data
+    assert response.request.path == '/sell'
+    with app.app_context():
+        db = get_db()
+        assert len(db.execute('SELECT 1 FROM ledger WHERE id=1').fetchall()) == 1
+        assert len(db.execute('SELECT 1 FROM holding WHERE id=1').fetchall()) == 1
