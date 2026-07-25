@@ -207,8 +207,8 @@ def test_sell_success(app, client, auth, monkeypatch, buy_symbol, buy_value, sel
         (5, 'AAPL', 1000, b"Sell value exceeds held value"),
         (100, 'AAPL', -100, b"Sell amount must be greater than $0.01"),
 ))
-def test_sell_fail(app, client, auth, monkeypatch, sell_price, sell_symbol, sell_amount,
-                   message):
+def test_sell_fail_quantities(app, client, auth, monkeypatch, sell_price, sell_symbol, sell_amount,
+                              message):
     buy_symbol = 'AAPL'
     buy_value = 1000
     monkeypatch.setattr("stocksim.trading.get_stock", lambda symbol: {"regularMarketPrice": 100})
@@ -233,3 +233,26 @@ def test_sell_fail(app, client, auth, monkeypatch, sell_price, sell_symbol, sell
         assert ledger[0]['type'] == 'buy'
         assert cash == db.execute('SELECT cash FROM users WHERE id=1').fetchone()['cash']
         assert holdings == db.execute('Select symbol, shares FROM holding WHERE user_id=1').fetchall()
+
+
+@pytest.mark.parametrize('message', (
+        'Invalid stock symbol: VOO',
+        'Empty stock symbol'
+))
+def test_sell_fail_symbol(app, client, auth, monkeypatch, message):
+    def fake_get_stock(_):
+        raise SymbolNotFoundError(message)
+
+    with app.app_context():
+        db = get_db()
+        cash = db.execute('SELECT cash FROM users WHERE id=1').fetchone()['cash']
+    monkeypatch.setattr("stocksim.trading.get_stock", fake_get_stock)
+
+    auth.login()
+    response = client.post('/sell', data={'symbol': 'AAPL', "sellamount": "1000"}, follow_redirects=True)
+    assert response.status_code == 200
+    assert message.encode("utf-8") in response.data
+    assert response.request.path == '/sell'
+    with app.app_context():
+        db = get_db()
+        assert cash == db.execute('SELECT cash FROM users WHERE id=1').fetchone()['cash']
