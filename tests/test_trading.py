@@ -136,6 +136,25 @@ def test_buy_again(app, auth, client, monkeypatch):
         assert holding[0]['shares'] == 25
 
 
+def test_buy_error(app, auth, client, monkeypatch):
+    with app.app_context():
+        db = get_db()
+        db.execute("DROP TABLE IF EXISTS ledger")
+
+    auth.login()
+    response = client.post(f'/buy/AAPL', data={'value': 1000}, follow_redirects=True)
+    assert response.status_code == 200
+    assert b"Database access error" in response.data
+    assert response.request.path == f'/buy/AAPL'
+
+    with app.app_context():
+        db = get_db()
+        cash = float(db.execute('SELECT cash FROM users WHERE id=1').fetchone()['cash'])
+        assert cash == 10000
+        holdings = db.execute('SELECT symbol, shares FROM holding WHERE user_id=1').fetchall()
+        assert len(holdings) == 0
+
+
 def test_sell(client, auth):
     auth.login()
     response = client.get('/sell')
