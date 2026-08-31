@@ -3,6 +3,16 @@
 A Flask-based stock market trading simulator, simulating real stocks using
 virtual cash and live market data.
 
+## Contents
+
+- [Features](#features)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+- [Help](#help)
+- [License](#license)
+- [Acknowledgements](#acknowledgements)
+
 ## Features
 
 - **Live stock data** - real-time prices via Yahoo Finance, using the
