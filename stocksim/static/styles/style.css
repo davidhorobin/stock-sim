@@ -1,23 +1,20 @@
-/* Stock Sim — modern, friendly theme */
+/* Stock Sim — ledger theme: greenbar paper, stamped actions */
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;1,500;1,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 :root {
-    --bg: #FBF6EC;
-    --panel: #FFFCF5;
-    --panel-alt: #F5EDDC;
-    --border: #E8DCC4;
-    --text: #3A3226;
-    --muted: #8A7F6B;
-    --accent: #D9822B;
-    --accent-dim: #F6E6CC;
-    --up: #4C9A5B;
-    --down: #C1543C;
-    --font-display: 'Poppins', sans-serif;
-    --font-body: 'Inter', sans-serif;
+    --paper: #F3F5EC;
+    --panel: #FBFCF7;
+    --band: #E3EEDA;
+    --rule: #BFD3B4;
+    --ink: #1E3A2C;
+    --ink-soft: #5B7263;
+    --accent: #2B5C73;
+    --up: #2F6F4E;
+    --down: #A6402F;
+    --font-display: 'Fraunces', serif;
+    --font-body: 'IBM Plex Sans', sans-serif;
     --font-mono: 'IBM Plex Mono', monospace;
-    --radius: 14px;
-    --shadow: 0 4px 16px rgba(31, 37, 55, 0.06);
 }
 
 * {
@@ -26,8 +23,8 @@
 
 body {
     margin: 0;
-    background: var(--bg);
-    color: var(--text);
+    background: var(--paper);
+    color: var(--ink);
     font-family: var(--font-body);
     font-size: 15px;
     line-height: 1.5;
@@ -40,9 +37,9 @@ nav {
     align-items: center;
     justify-content: space-between;
     padding: 0 2rem;
-    height: 68px;
-    background: var(--panel);
-    border-bottom: 1px solid var(--border);
+    height: 72px;
+    background: var(--paper);
+    border-bottom: 2px solid var(--ink);
     position: sticky;
     top: 0;
     z-index: 10;
@@ -50,51 +47,48 @@ nav {
 
 nav h1 {
     font-family: var(--font-display);
-    font-size: 1.2rem;
-    font-weight: 700;
-    letter-spacing: 0.01em;
+    font-style: italic;
+    font-size: 1.4rem;
+    font-weight: 600;
     margin: 0;
-    color: var(--text);
-}
-
-nav h1::before {
-    content: "📈 ";
+    color: var(--ink);
 }
 
 nav h1 a {
     text-decoration: none;
-    color: var(--text);
+    color: var(--ink);
 }
 
 nav ul {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 1.75rem;
     list-style: none;
     margin: 0;
     padding: 0;
 }
 
 nav ul li a {
-    color: var(--muted);
+    color: var(--ink-soft);
     text-decoration: none;
     font-size: 0.9rem;
     font-weight: 500;
-    padding: 0.5rem 0.9rem;
-    border-radius: 999px;
-    transition: color 0.15s ease, background 0.15s ease;
+    padding-bottom: 2px;
+    border-bottom: 1px solid transparent;
+    transition: color 0.12s ease, border-color 0.12s ease;
 }
 
 nav ul li a:hover,
 nav ul li a:focus-visible {
     color: var(--accent);
-    background: var(--accent-dim);
+    border-bottom-color: var(--accent);
 }
 
 nav ul li span {
-    color: var(--text);
+    color: var(--ink);
     font-size: 0.9rem;
     font-weight: 600;
+    font-family: var(--font-mono);
 }
 
 /* Content shell */
@@ -107,70 +101,65 @@ nav ul li span {
 
 header h1 {
     font-family: var(--font-display);
-    font-size: 1.7rem;
+    font-style: italic;
+    font-size: 2rem;
     font-weight: 600;
     margin: 0 0 1.5rem;
-    color: var(--text);
+    color: var(--ink);
 }
 
 .flash {
-    background: var(--accent-dim);
-    border: 1px solid var(--accent);
-    color: var(--text);
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--accent);
+    color: var(--ink);
     padding: 0.85rem 1.1rem;
-    border-radius: var(--radius);
     margin-bottom: 1.5rem;
     font-size: 0.9rem;
 }
 
-.btn-buy {
+.btn-buy,
+.btn-sell {
     display: inline-block;
-    background: var(--up);
-    color: #FFFFFF;
-    border: none;
-    padding: 0.6rem 1.4rem;
-    border-radius: 999px;
+    background: transparent;
+    border: 1.5px solid currentColor;
+    border-radius: 2px;
+    padding: 0.55rem 1.3rem;
     font-family: var(--font-body);
     font-weight: 600;
     font-size: 0.9rem;
     cursor: pointer;
     text-decoration: none;
-    box-shadow: 0 2px 8px rgba(22, 163, 74, 0.25);
-    transition: transform 0.1s ease, box-shadow 0.15s ease;
+    transition: background 0.12s ease, color 0.12s ease, transform 0.08s ease;
+}
+
+.btn-buy:active,
+.btn-sell:active {
+    transform: scale(0.98);
+}
+
+.btn-buy:focus-visible,
+.btn-sell:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.btn-buy {
+    color: var(--up);
 }
 
 .btn-buy:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
-}
-
-.btn-buy:active {
-    transform: translateY(0);
+    background: var(--up);
+    color: var(--paper);
 }
 
 .btn-sell {
-    display: inline-block;
-    background: var(--down);
-    color: #FFFFFF;
-    border: none;
-    padding: 0.6rem 1.4rem;
-    border-radius: 999px;
-    font-family: var(--font-body);
-    font-weight: 600;
-    font-size: 0.9rem;
-    cursor: pointer;
-    text-decoration: none;
-    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);
-    transition: transform 0.1s ease, box-shadow 0.15s ease;
+    color: var(--down);
 }
 
 .btn-sell:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-}
-
-.btn-sell:active {
-    transform: translateY(0);
+    background: var(--down);
+    color: var(--paper);
 }
 
 /* Market panel grid */
@@ -188,9 +177,7 @@ header h1 {
 .market-panel,
 .panel-block {
     background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
+    border: 1px solid var(--rule);
     overflow: hidden;
 }
 
@@ -198,24 +185,23 @@ header h1 {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    padding: 1rem 1.25rem;
-    background: var(--panel-alt);
-    border-bottom: 1px solid var(--border);
+    padding: 0.9rem 1.25rem;
+    border-bottom: 1px solid var(--rule);
 }
 
 .panel-head h3 {
     font-family: var(--font-display);
-    font-size: 0.85rem;
+    font-style: italic;
+    font-size: 1.05rem;
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
     margin: 0;
-    color: var(--text);
+    color: var(--ink);
 }
 
 .panel-sub {
     font-size: 0.75rem;
-    color: var(--muted);
+    font-family: var(--font-mono);
+    color: var(--ink-soft);
 }
 
 /* Tables */
@@ -226,22 +212,26 @@ table {
 }
 
 th, td {
-    padding: 0.7rem 1.25rem;
+    padding: 0.65rem 1.25rem;
     text-align: left;
     font-size: 0.85rem;
 }
 
 thead th {
-    color: var(--muted);
+    color: var(--ink-soft);
     font-weight: 500;
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--rule);
 }
 
 tbody tr {
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--rule);
+}
+
+tbody tr:nth-child(even) {
+    background: var(--band);
 }
 
 tbody tr:last-child {
@@ -253,11 +243,11 @@ tbody tr[onclick] {
 }
 
 tbody tr:hover {
-    background: var(--panel-alt);
+    background: var(--rule);
 }
 
 td.rank {
-    color: var(--muted);
+    color: var(--ink-soft);
     font-family: var(--font-mono);
     width: 2rem;
 }
@@ -269,29 +259,16 @@ td.ticker-cell {
     color: var(--accent);
 }
 
-h3.mono {
+.mono {
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
 }
 
-h3.change.up {
+.change.up {
     color: var(--up);
 }
 
-h3.change.down {
-    color: var(--down);
-}
-
-td.mono {
-    font-family: var(--font-mono);
-    font-variant-numeric: tabular-nums;
-}
-
-td.change.up {
-    color: var(--up);
-}
-
-td.change.down {
+.change.down {
     color: var(--down);
 }
 
@@ -309,17 +286,16 @@ td.change.down::before {
 
 .content > table {
     background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
+    border: 1px solid var(--rule);
     margin-top: 1.5rem;
 }
 
 .content > table td:first-child {
-    color: var(--muted);
+    color: var(--ink-soft);
+    font-family: var(--font-mono);
     font-weight: 500;
     width: 220px;
-    border-right: 1px solid var(--border);
+    border-right: 1px solid var(--rule);
 }
 
 /* News list */
@@ -331,16 +307,16 @@ td.change.down::before {
 }
 
 .news-list li {
-    padding: 0.75rem 1.25rem;
+    padding: 0.7rem 1.25rem;
     font-size: 0.88rem;
-    border-bottom: 1px solid var(--border);
-    color: var(--text);
+    border-bottom: 1px solid var(--rule);
+    color: var(--ink);
     cursor: pointer;
-    transition: background 0.15s ease;
+    transition: background 0.12s ease;
 }
 
 .news-list li:hover {
-    background: var(--panel-alt);
+    background: var(--band);
 }
 
 .news-list li:last-child {
@@ -364,49 +340,52 @@ form {
 
 form label {
     font-size: 0.85rem;
-    color: var(--muted);
+    color: var(--ink-soft);
 }
 
-form input[type="text"],
 form input:not([type="submit"]) {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 0.6rem 0.9rem;
-    border-radius: 999px;
+    background: transparent;
+    border: none;
+    border-bottom: 1.5px solid var(--rule);
+    border-radius: 0;
+    color: var(--ink);
+    padding: 0.5rem 0.25rem;
     font-family: var(--font-mono);
-    font-size: 0.9rem;
+    font-size: 0.95rem;
 }
 
 form input:not([type="submit"]):focus-visible {
     outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-dim);
+    border-bottom-color: var(--accent);
 }
 
 form input[type="submit"] {
-    background: var(--accent);
-    color: #FFFFFF;
-    border: none;
-    padding: 0.6rem 1.4rem;
-    border-radius: 999px;
+    background: transparent;
+    border: 1.5px solid var(--accent);
+    border-radius: 2px;
+    color: var(--accent);
+    padding: 0.55rem 1.3rem;
     font-weight: 600;
     font-size: 0.9rem;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(217, 130, 43, 0.3);
-    transition: transform 0.1s ease, box-shadow 0.15s ease;
+    transition: background 0.12s ease, color 0.12s ease;
 }
 
 form input[type="submit"]:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(217, 130, 43, 0.35);
+    background: var(--accent);
+    color: var(--paper);
+}
+
+form input[type="submit"]:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
 }
 
 /* Footer */
 
 .site-footer {
-    border-top: 1px solid var(--border);
-    background: var(--panel);
+    border-top: 1px solid var(--rule);
+    background: var(--paper);
     margin-top: 3rem;
 }
 
@@ -418,7 +397,7 @@ form input[type="submit"]:hover {
     justify-content: space-between;
     align-items: center;
     font-size: 0.8rem;
-    color: var(--muted);
+    color: var(--ink-soft);
 }
 
 .footer-links {
@@ -428,7 +407,7 @@ form input[type="submit"]:hover {
 }
 
 .footer-links a {
-    color: var(--muted);
+    color: var(--ink-soft);
     text-decoration: none;
 }
 
@@ -437,7 +416,7 @@ form input[type="submit"]:hover {
 }
 
 .footer-links a:not(:last-child) {
-    border-right: 1px solid var(--border);
+    border-right: 1px solid var(--rule);
     padding-right: 1.25rem;
 }
 
@@ -453,7 +432,7 @@ form input[type="submit"]:hover {
 
     nav ul {
         flex-wrap: wrap;
-        gap: 0.5rem;
+        gap: 1rem;
         justify-content: center;
     }
 
