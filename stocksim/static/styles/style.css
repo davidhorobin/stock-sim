@@ -1,21 +1,23 @@
-/* Stock Sim — trading terminal theme */
+/* Stock Sim — modern, friendly theme */
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 :root {
-    --bg: #0B1220;
-    --panel: #131B2C;
-    --panel-alt: #172038;
-    --border: #24304A;
-    --text: #E7ECF5;
-    --muted: #8A94A6;
-    --accent: #38BDF8;
-    --accent-dim: #1E4E63;
-    --up: #16C784;
-    --down: #EA3943;
-    --font-display: 'Space Grotesk', sans-serif;
+    --bg: #FBF6EC;
+    --panel: #FFFCF5;
+    --panel-alt: #F5EDDC;
+    --border: #E8DCC4;
+    --text: #3A3226;
+    --muted: #8A7F6B;
+    --accent: #D9822B;
+    --accent-dim: #F6E6CC;
+    --up: #4C9A5B;
+    --down: #C1543C;
+    --font-display: 'Poppins', sans-serif;
     --font-body: 'Inter', sans-serif;
     --font-mono: 'IBM Plex Mono', monospace;
+    --radius: 14px;
+    --shadow: 0 4px 16px rgba(31, 37, 55, 0.06);
 }
 
 * {
@@ -38,7 +40,7 @@ nav {
     align-items: center;
     justify-content: space-between;
     padding: 0 2rem;
-    height: 64px;
+    height: 68px;
     background: var(--panel);
     border-bottom: 1px solid var(--border);
     position: sticky;
@@ -48,16 +50,15 @@ nav {
 
 nav h1 {
     font-family: var(--font-display);
-    font-size: 1.15rem;
+    font-size: 1.2rem;
     font-weight: 700;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.01em;
     margin: 0;
     color: var(--text);
 }
 
 nav h1::before {
-    content: "● ";
-    color: var(--accent);
+    content: "📈 ";
 }
 
 nav h1 a {
@@ -68,7 +69,7 @@ nav h1 a {
 nav ul {
     display: flex;
     align-items: center;
-    gap: 1.75rem;
+    gap: 0.5rem;
     list-style: none;
     margin: 0;
     padding: 0;
@@ -79,19 +80,21 @@ nav ul li a {
     text-decoration: none;
     font-size: 0.9rem;
     font-weight: 500;
-    transition: color 0.15s ease;
+    padding: 0.5rem 0.9rem;
+    border-radius: 999px;
+    transition: color 0.15s ease, background 0.15s ease;
 }
 
 nav ul li a:hover,
 nav ul li a:focus-visible {
     color: var(--accent);
+    background: var(--accent-dim);
 }
 
 nav ul li span {
     color: var(--text);
     font-size: 0.9rem;
     font-weight: 600;
-    font-family: var(--font-mono);
 }
 
 /* Content shell */
@@ -99,12 +102,12 @@ nav ul li span {
 .content {
     max-width: 1180px;
     margin: 0 auto;
-    padding: 2rem 2rem 4rem;
+    padding: 2.5rem 2rem 4rem;
 }
 
 header h1 {
     font-family: var(--font-display);
-    font-size: 1.6rem;
+    font-size: 1.7rem;
     font-weight: 600;
     margin: 0 0 1.5rem;
     color: var(--text);
@@ -114,8 +117,8 @@ header h1 {
     background: var(--accent-dim);
     border: 1px solid var(--accent);
     color: var(--text);
-    padding: 0.75rem 1rem;
-    border-radius: 4px;
+    padding: 0.85rem 1.1rem;
+    border-radius: var(--radius);
     margin-bottom: 1.5rem;
     font-size: 0.9rem;
 }
@@ -123,47 +126,51 @@ header h1 {
 .btn-buy {
     display: inline-block;
     background: var(--up);
-    color: #06281B;
+    color: #FFFFFF;
     border: none;
-    padding: 0.55rem 1.25rem;
-    border-radius: 4px;
+    padding: 0.6rem 1.4rem;
+    border-radius: 999px;
     font-family: var(--font-body);
     font-weight: 600;
     font-size: 0.9rem;
     cursor: pointer;
     text-decoration: none;
-    transition: filter 0.15s ease;
+    box-shadow: 0 2px 8px rgba(22, 163, 74, 0.25);
+    transition: transform 0.1s ease, box-shadow 0.15s ease;
 }
 
 .btn-buy:hover {
-    filter: brightness(1.1);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
 }
 
 .btn-buy:active {
-    filter: brightness(0.95);
+    transform: translateY(0);
 }
 
 .btn-sell {
     display: inline-block;
     background: var(--down);
-    color: #2B0808;
+    color: #FFFFFF;
     border: none;
-    padding: 0.55rem 1.25rem;
-    border-radius: 4px;
+    padding: 0.6rem 1.4rem;
+    border-radius: 999px;
     font-family: var(--font-body);
     font-weight: 600;
     font-size: 0.9rem;
     cursor: pointer;
     text-decoration: none;
-    transition: filter 0.15s ease;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);
+    transition: transform 0.1s ease, box-shadow 0.15s ease;
 }
 
 .btn-sell:hover {
-    filter: brightness(1.1);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
 .btn-sell:active {
-    filter: brightness(0.95);
+    transform: translateY(0);
 }
 
 /* Market panel grid */
@@ -182,7 +189,8 @@ header h1 {
 .panel-block {
     background: var(--panel);
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
     overflow: hidden;
 }
 
@@ -190,7 +198,7 @@ header h1 {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    padding: 0.85rem 1rem;
+    padding: 1rem 1.25rem;
     background: var(--panel-alt);
     border-bottom: 1px solid var(--border);
 }
@@ -218,7 +226,7 @@ table {
 }
 
 th, td {
-    padding: 0.6rem 1rem;
+    padding: 0.7rem 1.25rem;
     text-align: left;
     font-size: 0.85rem;
 }
@@ -302,7 +310,8 @@ td.change.down::before {
 .content > table {
     background: var(--panel);
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
     margin-top: 1.5rem;
 }
 
@@ -322,11 +331,12 @@ td.change.down::before {
 }
 
 .news-list li {
-    padding: 0.65rem 1rem;
+    padding: 0.75rem 1.25rem;
     font-size: 0.88rem;
     border-bottom: 1px solid var(--border);
     color: var(--text);
     cursor: pointer;
+    transition: background 0.15s ease;
 }
 
 .news-list li:hover {
@@ -362,8 +372,8 @@ form input:not([type="submit"]) {
     background: var(--panel);
     border: 1px solid var(--border);
     color: var(--text);
-    padding: 0.55rem 0.75rem;
-    border-radius: 4px;
+    padding: 0.6rem 0.9rem;
+    border-radius: 999px;
     font-family: var(--font-mono);
     font-size: 0.9rem;
 }
@@ -371,22 +381,25 @@ form input:not([type="submit"]) {
 form input:not([type="submit"]):focus-visible {
     outline: none;
     border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
 }
 
 form input[type="submit"] {
     background: var(--accent);
-    color: #04202B;
+    color: #FFFFFF;
     border: none;
-    padding: 0.55rem 1.25rem;
-    border-radius: 4px;
+    padding: 0.6rem 1.4rem;
+    border-radius: 999px;
     font-weight: 600;
     font-size: 0.9rem;
     cursor: pointer;
-    transition: filter 0.15s ease;
+    box-shadow: 0 2px 8px rgba(217, 130, 43, 0.3);
+    transition: transform 0.1s ease, box-shadow 0.15s ease;
 }
 
 form input[type="submit"]:hover {
-    filter: brightness(1.1);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(217, 130, 43, 0.35);
 }
 
 /* Footer */
@@ -440,7 +453,7 @@ form input[type="submit"]:hover {
 
     nav ul {
         flex-wrap: wrap;
-        gap: 1rem;
+        gap: 0.5rem;
         justify-content: center;
     }
 
